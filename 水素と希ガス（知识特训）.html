@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>氢与稀有气体 特训道场</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP","Microsoft YaHei",sans-serif;
+  background:#eef6ff;
+  background-image:
+    radial-gradient(at 0% 0%, #cffafe 0px, transparent 55%),
+    radial-gradient(at 100% 0%, #dbeafe 0px, transparent 55%),
+    radial-gradient(at 50% 100%, #e0e7ff 0px, transparent 55%);
+  background-attachment:fixed;
+  min-height:100vh;color:#1e293b;padding:22px 14px 60px;
+  -webkit-font-smoothing:antialiased;
+}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:999;display:none;}
+.wrap{max-width:860px;margin:0 auto;}
+.view{display:none;}
+.view.active{display:block;animation:pop .42s cubic-bezier(.34,1.56,.64,1);}
+@keyframes pop{from{opacity:0;transform:translateY(18px) scale(.985);}to{opacity:1;transform:none;}}
+
+/* 首页 */
+.hero{text-align:center;margin-bottom:26px;}
+.hero .icon{
+  width:86px;height:86px;margin:0 auto 16px;border-radius:28px;
+  background:linear-gradient(135deg,#0ea5e9,#6366f1,#a855f7);
+  display:flex;align-items:center;justify-content:center;font-size:44px;
+  box-shadow:0 16px 40px rgba(99,102,241,.42);
+  animation:float 3.6s ease-in-out infinite;
+}
+@keyframes float{0%,100%{transform:translateY(0) rotate(-2deg);}50%{transform:translateY(-10px) rotate(2deg);}}
+.hero h1{font-size:27px;font-weight:900;letter-spacing:.5px;margin-bottom:4px;}
+.hero .sub{font-size:14px;color:#6366f1;font-weight:800;margin-bottom:10px;letter-spacing:.5px;}
+.hero p{font-size:13.5px;color:#64748b;line-height:1.75;}
+
+.statrow{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px;}
+.statbox{background:#fff;border-radius:18px;padding:16px 8px;text-align:center;border:1.5px solid #e8eeff;box-shadow:0 6px 20px rgba(99,102,241,.07);}
+.statbox b{font-size:24px;font-weight:900;color:#6366f1;display:block;line-height:1.15;}
+.statbox small{font-size:11px;color:#94a3b8;letter-spacing:.5px;}
+
+.homecards{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:560px){.homecards{grid-template-columns:1fr;}}
+
+.homecard{
+  background:#fff;border:2px solid #e8eeff;border-radius:24px;
+  padding:26px 20px;text-align:center;cursor:pointer;
+  transition:.22s cubic-bezier(.4,0,.2,1);font-family:inherit;
+  box-shadow:0 10px 30px rgba(99,102,241,.08);
+  position:relative;overflow:hidden;
+}
+.homecard.primary{
+  background:linear-gradient(135deg,#6366f1,#8b5cf6,#a855f7);
+  border-color:transparent;color:#fff;
+  box-shadow:0 14px 36px rgba(99,102,241,.36);
+}
+.homecard.primary .hctitle{color:#fff;}
+.homecard.primary .hcjp{color:rgba(255,255,255,.75);}
+.homecard.primary .hcsub{color:rgba(255,255,255,.85);}
+.homecard:not(.locked):hover{
+  transform:translateY(-5px);border-color:#a5b4fc;
+  box-shadow:0 18px 40px rgba(99,102,241,.2);
+}
+.homecard.primary:hover{box-shadow:0 20px 44px rgba(99,102,241,.5);}
+.hcicon{font-size:44px;margin-bottom:12px;display:block;transition:.24s;position:relative;}
+.homecard:not(.locked):hover .hcicon{transform:scale(1.12) rotate(-4deg);}
+.hctitle{font-size:18px;font-weight:900;color:#334155;margin-bottom:4px;position:relative;}
+.hcjp{font-size:12px;font-weight:800;color:#94a3b8;margin-bottom:6px;position:relative;letter-spacing:.5px;}
+.hcsub{font-size:12.5px;color:#94a3b8;font-weight:600;line-height:1.6;position:relative;}
+
+.homecard.locked{
+  background:#f1f5f9;border-color:#e2e8f0;cursor:not-allowed;
+  opacity:.62;filter:grayscale(.5);
+}
+.homecard.locked .hcicon{filter:grayscale(1);}
+.homecard.locked::after{
+  content:"🔒 答题中不可查看";position:absolute;top:12px;right:14px;
+  font-size:11px;font-weight:900;color:#94a3b8;
+  background:#fff;padding:3px 10px;border-radius:99px;
+  border:1px solid #e2e8f0;
+}
+
+.homenote{
+  margin-top:18px;text-align:center;font-size:12.5px;color:#f97316;
+  background:#fff7ed;border:1.5px solid #fed7aa;border-radius:14px;
+  padding:12px 16px;font-weight:700;line-height:1.7;
+}
+
+/* 知识点页 */
+.learnhead{display:flex;align-items:center;gap:13px;margin-bottom:22px;}
+.learnhead .licon{
+  width:52px;height:52px;border-radius:17px;flex:none;
+  background:linear-gradient(135deg,#0ea5e9,#6366f1);
+  display:flex;align-items:center;justify-content:center;font-size:26px;
+  box-shadow:0 10px 26px rgba(14,165,233,.34);
+}
+.learnhead h2{font-size:20px;font-weight:900;}
+.learnhead p{font-size:12.5px;color:#94a3b8;font-weight:600;margin-top:3px;}
+
+.legend{
+  display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px;
+  background:#fff;border:1.5px solid #e8eeff;border-radius:14px;
+  padding:12px 16px;font-size:12.5px;color:#475569;font-weight:600;
+}
+.legend .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle;}
+.legend .dot.hot{background:linear-gradient(135deg,#38bdf8,#6366f1);}
+.legend .dot.cold{background:#cbd5e1;}
+
+.kcard{
+  background:#fff;border-radius:22px;padding:24px 24px 20px;
+  margin-bottom:16px;border:1.5px solid #e8eeff;
+  box-shadow:0 8px 26px rgba(99,102,241,.07);
+  animation:pop .5s cubic-bezier(.34,1.56,.64,1) both;
+}
+.kcard:nth-child(2){animation-delay:.05s;}
+.kcard:nth-child(3){animation-delay:.1s;}
+.kcard:nth-child(4){animation-delay:.15s;}
+.kcard:nth-child(5){animation-delay:.2s;}
+.kcard:nth-child(6){animation-delay:.25s;}
+.kcard:nth-child(7){animation-delay:.3s;}
+.kcard:nth-child(8){animation-delay:.35s;}
+
+.kcard-head{display:flex;align-items:center;gap:11px;margin-bottom:16px;}
+.kcard-emoji{
+  width:42px;height:42px;border-radius:13px;flex:none;
+  display:flex;align-items:center;justify-content:center;font-size:22px;
+}
+.kcard-emoji.c1{background:linear-gradient(135deg,#e0f2fe,#bae6fd);}
+.kcard-emoji.c2{background:linear-gradient(135deg,#ede9fe,#ddd6fe);}
+.kcard-emoji.c3{background:linear-gradient(135deg,#fce7f3,#fbcfe8);}
+.kcard-emoji.c4{background:linear-gradient(135deg,#d1fae5,#a7f3d0);}
+.kcard-emoji.c5{background:linear-gradient(135deg,#fef3c7,#fde68a);}
+.kcard-emoji.c6{background:linear-gradient(135deg,#fee2e2,#fecaca);}
+.kcard-emoji.c7{background:linear-gradient(135deg,#e0e7ff,#c7d2fe);}
+.kcard-title{font-size:17px;font-weight:900;color:#1e293b;letter-spacing:.3px;}
+.kcard-title small{font-size:11.5px;color:#94a3b8;font-weight:700;margin-left:6px;}
+
+.kcard ul{list-style:none;padding:0;}
+.kcard li{
+  position:relative;padding:7px 0 7px 24px;font-size:14.5px;
+  line-height:1.8;color:#334155;font-weight:600;
+}
+.kcard li::before{
+  content:"";position:absolute;left:6px;top:15px;
+  width:8px;height:8px;border-radius:50%;
+  background:linear-gradient(135deg,#38bdf8,#6366f1);
+}
+.kcard li b{color:#4f46e5;font-weight:900;}
+.kcard li sub{font-size:.7em;vertical-align:-.28em;font-weight:800;}
+
+.kcard li.muted{
+  color:#94a3b8;font-weight:500;
+}
+.kcard li.muted::before{
+  background:#cbd5e1;
+}
+.kcard li.muted b{color:#94a3b8;font-weight:600;}
+
+.kformula{
+  background:linear-gradient(135deg,#f0f9ff,#e0f2fe);
+  border-left:4px solid #38bdf8;
+  padding:13px 18px;border-radius:12px;margin:10px 0 4px;
+  font-size:15px;font-weight:800;color:#0369a1;
+  font-family:"Helvetica Neue",Arial,sans-serif;letter-spacing:.5px;
+  text-align:center;line-height:1.7;
+}
+.kformula sub{font-size:.7em;vertical-align:-.28em;font-weight:800;}
+
+.ktable{width:100%;border-collapse:collapse;margin:8px 0 4px;font-size:13px;}
+.ktable.muted{opacity:.62;}
+.ktable th{
+  background:#eef2ff;color:#4338ca;font-weight:800;
+  padding:8px 6px;text-align:center;border:1px solid #e0e7ff;
+  font-size:12px;
+}
+.ktable.muted th{background:#f1f5f9;color:#94a3b8;border-color:#e2e8f0;}
+.ktable td{
+  padding:7px 6px;text-align:center;border:1px solid #e8eeff;
+  color:#334155;font-weight:600;
+}
+.ktable.muted td{color:#94a3b8;border-color:#e2e8f0;}
+.ktable td b{color:#4f46e5;font-weight:900;}
+.ktable.muted td b{color:#94a3b8;}
+.ktable sub{font-size:.72em;vertical-align:-.28em;font-weight:800;}
+
+.subhead{
+  font-size:12px;color:#94a3b8;font-weight:800;letter-spacing:.5px;
+  margin:14px 0 6px;
+}
+
+.highlight-box{
+  background:linear-gradient(135deg,#eef2ff,#e0e7ff);
+  border-left:4px solid #6366f1;
+  padding:14px 18px;border-radius:12px;margin:10px 0 4px;
+  font-size:14.5px;font-weight:800;color:#3730a3;
+  line-height:1.8;text-align:center;
+}
+.highlight-box b{color:#4338ca;font-weight:900;}
+
+.startbtn{
+  width:100%;padding:18px;border:none;border-radius:18px;
+  font-size:17px;font-weight:900;font-family:inherit;letter-spacing:.6px;
+  cursor:pointer;transition:.2s;margin-top:10px;
+  background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;
+  box-shadow:0 12px 30px rgba(99,102,241,.4);
+}
+.startbtn:hover{transform:translateY(-2px);box-shadow:0 16px 38px rgba(99,102,241,.5);}
+
+.learnwarn{
+  margin-top:14px;text-align:center;font-size:12.5px;color:#f97316;
+  font-weight:700;line-height:1.7;
+}
+
+/* 答题页 */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
+.qmeta{font-size:15px;font-weight:800;color:#334155;}
+.qmeta small{display:block;font-size:11.5px;color:#94a3b8;font-weight:600;margin-top:2px;}
+.scorechip{background:#fff;border-radius:15px;padding:8px 20px;text-align:center;box-shadow:0 6px 20px rgba(99,102,241,.13);}
+.scorechip b{font-size:20px;color:#6366f1;line-height:1.1;display:block;}
+.scorechip small{font-size:10px;color:#94a3b8;letter-spacing:1px;}
+
+.progresswrap{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+.progress{flex:1;height:10px;border-radius:99px;background:#fff;overflow:hidden;box-shadow:inset 0 1px 3px rgba(0,0,0,.06);}
+#bar{height:100%;width:0%;border-radius:99px;background:linear-gradient(90deg,#0ea5e9,#6366f1,#ec4899);transition:width .45s cubic-bezier(.4,0,.2,1);}
+#pct{font-size:12px;font-weight:800;color:#818cf8;min-width:42px;text-align:right;}
+
+.card{background:#fff;border-radius:28px;padding:30px 26px 26px;box-shadow:0 18px 55px rgba(79,70,229,.14);}
+
+.qtag{
+  display:inline-block;font-size:12px;font-weight:800;padding:5px 14px;
+  border-radius:99px;letter-spacing:.5px;margin-bottom:16px;
+  background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;
+  box-shadow:0 4px 12px rgba(99,102,241,.3);
+}
+.qtag.fill{background:linear-gradient(135deg,#0ea5e9,#06b6d4);box-shadow:0 4px 12px rgba(14,165,233,.3);}
+
+.qtext{font-size:16.5px;line-height:1.95;font-weight:600;color:#1e293b;margin-bottom:4px;word-break:break-word;}
+.qtext sub{font-size:.7em;vertical-align:-.28em;font-weight:800;}
+
+.options{display:flex;flex-direction:column;gap:11px;margin-top:20px;}
+.opt{
+  display:flex;align-items:flex-start;gap:14px;width:100%;text-align:left;
+  padding:15px 18px;border-radius:17px;border:2px solid #edf0fa;
+  background:#fafbff;color:#1e293b;font-size:15.5px;line-height:1.7;
+  font-family:inherit;font-weight:600;cursor:pointer;
+  transition:.18s cubic-bezier(.4,0,.2,1);
+}
+.opt .num{
+  flex:none;width:28px;height:28px;border-radius:50%;
+  background:#eef2ff;color:#6366f1;font-size:13px;font-weight:900;
+  display:flex;align-items:center;justify-content:center;transition:.18s;
+}
+.opt .txt{flex:1;padding-top:1px;}
+.opt .txt sub{font-size:.7em;vertical-align:-.28em;font-weight:800;}
+.opt:not(:disabled):hover{border-color:#a5b4fc;background:#fff;transform:translateY(-2px);box-shadow:0 10px 26px rgba(99,102,241,.17);}
+.opt:not(:disabled):hover .num{background:#6366f1;color:#fff;}
+.opt:disabled{cursor:default;}
+.opt.correct{border-color:#34d399;background:linear-gradient(135deg,#ecfdf5,#d1fae5);box-shadow:0 8px 22px rgba(16,185,129,.22);}
+.opt.correct .num{background:#10b981;color:#fff;}
+.opt.wrong{border-color:#f87171;background:linear-gradient(135deg,#fef2f2,#fee2e2);animation:shake .42s;}
+.opt.wrong .num{background:#ef4444;color:#fff;}
+.opt.dim{opacity:.45;}
+@keyframes shake{0%,100%{transform:translateX(0);}20%{transform:translateX(-7px);}40%{transform:translateX(7px);}60%{transform:translateX(-5px);}80%{transform:translateX(5px);}}
+
+.slotwrap{display:flex;justify-content:center;margin:22px 0 8px;}
+.slot{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:170px;min-height:64px;padding:10px 24px;
+  border-radius:18px;border:2.5px dashed #7dd3fc;
+  background:linear-gradient(135deg,#f0f9ff,#e0f2fe);
+  font-size:22px;font-weight:900;color:#0369a1;letter-spacing:1.5px;
+  cursor:pointer;transition:.2s;
+}
+.slot sub{font-size:.68em;vertical-align:-.28em;font-weight:800;}
+.slot.empty{color:#93c5fd;font-size:14px;letter-spacing:0;font-weight:700;}
+.slot:hover{transform:translateY(-2px);border-color:#38bdf8;box-shadow:0 8px 22px rgba(56,189,248,.22);}
+.slot.filled{background:linear-gradient(135deg,#e0f2fe,#bae6fd);border-style:solid;border-color:#38bdf8;}
+.slot.correct{background:linear-gradient(135deg,#ecfdf5,#d1fae5);border-color:#34d399;color:#047857;border-style:solid;}
+.slot.wrong{background:linear-gradient(135deg,#fef2f2,#fee2e2);border-color:#f87171;color:#dc2626;border-style:solid;animation:shake .42s;}
+
+.bank{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:20px;}
+.chip{
+  padding:13px 22px;border-radius:16px;border:2px solid #e5e9f7;
+  background:#fff;color:#334155;font-family:inherit;font-size:17px;
+  font-weight:800;cursor:pointer;transition:.16s;letter-spacing:.5px;
+}
+.chip sub{font-size:.7em;vertical-align:-.28em;font-weight:800;}
+.chip:hover{background:#eef2ff;border-color:#a5b4fc;transform:translateY(-2px);box-shadow:0 8px 20px rgba(99,102,241,.15);}
+.chip:active{transform:scale(.95);}
+.chip.used{opacity:.28;pointer-events:none;}
+
+.confirmbtn{
+  width:100%;margin-top:14px;padding:15px;border:none;border-radius:16px;
+  background:linear-gradient(135deg,#f59e0b,#f97316);color:#fff;
+  font-size:15.5px;font-weight:900;font-family:inherit;cursor:pointer;
+  box-shadow:0 8px 22px rgba(249,115,22,.34);transition:.2s;
+}
+.confirmbtn:hover{transform:translateY(-2px);}
+.confirmbtn:disabled{background:#e2e8f0;color:#94a3b8;box-shadow:none;cursor:not-allowed;transform:none;}
+
+.feedback{margin-top:20px;padding:20px;border-radius:20px;animation:pop .36s cubic-bezier(.34,1.56,.64,1);}
+.feedback.ok{background:linear-gradient(135deg,#ecfdf5,#f0fdf4);border:1.5px solid #a7f3d0;}
+.feedback.no{background:linear-gradient(135deg,#fff7ed,#fef2f2);border:1.5px solid #fed7aa;}
+.fb-title{font-size:17px;font-weight:900;margin-bottom:10px;}
+.feedback.ok .fb-title{color:#059669;}
+.feedback.no .fb-title{color:#ea580c;}
+.fb-body{font-size:14.5px;line-height:1.95;color:#334155;}
+.fb-body b{color:#4f46e5;}
+.fb-body sub{font-size:.7em;vertical-align:-.28em;font-weight:800;}
+
+.nextbtn{
+  margin-top:16px;width:100%;padding:16px;border:none;border-radius:17px;
+  background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;
+  font-size:16px;font-weight:900;font-family:inherit;letter-spacing:.5px;
+  cursor:pointer;transition:.2s;box-shadow:0 8px 24px rgba(99,102,241,.36);
+}
+.nextbtn:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(99,102,241,.46);}
+
+.result{text-align:center;padding:14px 4px;}
+.result .emoji{font-size:74px;line-height:1;margin-bottom:10px;animation:bounce .95s;}
+@keyframes bounce{0%{transform:scale(.25) rotate(-20deg);opacity:0;}60%{transform:scale(1.18) rotate(6deg);}100%{transform:scale(1) rotate(0);opacity:1;}}
+.result h2{font-size:26px;font-weight:900;margin-bottom:6px;}
+.title-badge{
+  display:inline-block;margin:12px 0 18px;padding:10px 28px;border-radius:99px;
+  font-size:17px;font-weight:900;letter-spacing:1px;
+  background:linear-gradient(135deg,#38bdf8,#6366f1,#a855f7);
+  color:#fff;box-shadow:0 10px 28px rgba(99,102,241,.42);
+  animation:glow 1.8s ease-in-out infinite;
+}
+@keyframes glow{0%,100%{box-shadow:0 10px 28px rgba(99,102,241,.42);}50%{box-shadow:0 14px 40px rgba(168,85,247,.55);}}
+.result .sub{color:#64748b;font-size:14px;margin-bottom:20px;line-height:1.8;}
+.ring{position:relative;width:180px;height:180px;margin:0 auto 18px;}
+.ring svg{transform:rotate(-90deg);}
+.ring .inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.bignum{
+  font-size:56px;font-weight:900;line-height:1.05;
+  background:linear-gradient(135deg,#0ea5e9,#6366f1,#ec4899);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.bignum small{font-size:22px;color:#94a3b8;-webkit-text-fill-color:#94a3b8;}
+
+.review{margin-top:24px;text-align:left;background:#f8faff;border-radius:20px;padding:20px;}
+.review h3{font-size:14px;color:#64748b;margin-bottom:14px;letter-spacing:.5px;font-weight:900;}
+.review .item{
+  display:flex;gap:11px;font-size:14px;padding:11px 0;
+  border-bottom:1px dashed #e2e8f0;line-height:1.7;align-items:flex-start;
+}
+.review .item:last-child{border-bottom:none;}
+.review .tag{flex:none;background:#eef2ff;color:#6366f1;font-weight:900;font-size:12px;padding:3px 10px;border-radius:8px;}
+.review .ans{color:#059669;font-weight:900;}
+
+.resultbtns{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px;justify-content:center;}
+.again{
+  padding:16px 40px;border:none;border-radius:17px;
+  background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;
+  font-size:16px;font-weight:900;font-family:inherit;cursor:pointer;
+  box-shadow:0 10px 28px rgba(99,102,241,.36);transition:.2s;
+}
+.again:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(99,102,241,.46);}
+.homebtn{
+  padding:16px 40px;border:2px solid #e0e7ff;border-radius:17px;
+  background:#fff;color:#6366f1;font-size:16px;font-weight:900;
+  font-family:inherit;cursor:pointer;transition:.2s;
+}
+.homebtn:hover{background:#f1f5ff;transform:translateY(-2px);}
+
+@media (max-width:640px){
+  body{padding:14px 10px 44px;}
+  .card{padding:24px 16px 22px;border-radius:22px;}
+  .hero h1{font-size:23px;}
+  .opt{font-size:14.5px;padding:13px 14px;}
+  .slot{min-width:140px;font-size:19px;}
+  .kcard{padding:20px 18px 16px;}
+  .ktable{font-size:11.5px;}
+  .ktable th,.ktable td{padding:6px 3px;}
+}
+</style>
+</head>
+<body>
+<canvas id="confetti"></canvas>
+<div class="wrap">
+
+  <!-- ========== 首页 ========== -->
+  <section id="v-home" class="view active">
+    <div class="hero">
+      <div class="icon">💧</div>
+      <h1>氢与稀有气体 特训道场</h1>
+      <div class="sub">水素と希ガス 特訓道場</div>
+      <p>水素 H₂ 与 18族希ガス（He・Ne・Ar）的重点<br>用 10 道题来检查掌握程度！</p>
+    </div>
+
+    <div class="statrow">
+      <div class="statbox"><b id="dbCount">0</b><small>收录题目</small></div>
+      <div class="statbox"><b>10</b><small>每轮出题</small></div>
+      <div class="statbox"><b>7</b><small>合格线</small></div>
+    </div>
+
+    <div class="homecards">
+      <button class="homecard" id="learnCard">
+        <span class="hcicon">📖</span>
+        <div class="hctitle">知识要点</div>
+        <div class="hcjp">知識ポイント</div>
+        <div class="hcsub">水素と希ガスの要点を確認</div>
+      </button>
+      <button class="homecard primary" id="startCard">
+        <span class="hcicon">✏️</span>
+        <div class="hctitle">开始特训</div>
+        <div class="hcjp">特訓スタート</div>
+        <div class="hcsub">10 問でチェック！</div>
+      </button>
+    </div>
+
+    <div class="homenote" id="homeNote">
+      ⚠️ 开始特训后无法查看知识要点，答完返回首页即可重新查看
+    </div>
+  </section>
+
+  <!-- ========== 知识点页 ========== -->
+  <section id="v-learn" class="view">
+    <div class="learnhead">
+      <div class="licon">📖</div>
+      <div>
+        <h2>知识要点 · 知識ポイント</h2>
+        <p>水素と希ガス（18族）のまとめ</p>
+      </div>
+    </div>
+
+    <div class="legend">
+      <span><span class="dot hot"></span>彩色 = 考试重点，会出题</span>
+      <span><span class="dot cold"></span>灰色 = 了解即可，不出题</span>
+    </div>
+
+    <!-- 1. 水素の存在 -->
+    <div class="kcard">
+      <div class="kcard-head">
+        <div class="kcard-emoji c1">🌌</div>
+        <div class="kcard-title">水素の存在 <small>水素的存在</small></div>
+      </div>
+      <ul>
+        <li><b>水素は宇宙に最も多く存在する元素</b>である。</li>
+        <li>宇宙では原子量の小さい<b>ヘリウム He</b> が水素の次に多く存在する。</li>
+        <li class="muted">太陽の質量の約 70％ は水素である。</li>
+        <li class="muted">宇宙の元素の存在比（質量％）：H 約71％、He 約27％、その他約2％。</li>
+      </ul>
+    </div>
+
+    <!-- 2. 水素の性質 -->
+    <div class="kcard">
+      <div class="kcard-head">
+        <div class="kcard-emoji c2">💧</div>
+        <div class="kcard-title">水素 H<sub>2</sub> の性質</div>
+      </div>
+      <ul>
+        <li>単体は<b>二原子分子 H<sub>2</sub></b>、無色・無臭。</li>
+        <li><b>すべての気体の中で最も密度が小さい</b>。</li>
+        <li>水素は<b>還元剤</b>として働き、加熱した酸化銅(Ⅱ) CuO を銅 Cu に還元する。</li>
+        <li>水素 H<sub>2</sub> と酸素 O<sub>2</sub> を混合して点火すると、<b>爆発的に反応して水になる</b>。</li>
+        <li>酸素との反応で水しか生じないことから、<b>燃料電池の負極活物質</b>や、石油にかわるエネルギー資源として期待されている。</li>
+        <li class="muted">融点 −259 ℃、沸点 −253 ℃、密度 0.08988 g/L。</li>
+      </ul>
+      <div class="kformula">
+        CuO + H<sub>2</sub> → Cu + H<sub>2</sub>O<br>
+        2H<sub>2</sub> + O<sub>2</sub> → 2H<sub>2</sub>O
+      </div>
+    </div>
+
+    <!-- 3. 水素の製法 -->
+    <div class="kcard">
+      <div class="kcard-head">
+        <div class="kcard-emoji c3">⚗️</div>
+        <div class="kcard-title">水素の製法 <small>制法</small></div>
+      </div>
+      <ul>
+        <li><b>実験室</b>：水を電気分解するか、亜鉛 Zn や鉄 Fe などのイオン化傾向の大きい金属に希硫酸などの酸を加えて発生させる。</li>
+        <li>捕集は<b>水上置換</b>で行う。</li>
+        <li><b>工業的</b>：石油や天然ガスと高温水蒸気との反応、または水の電気分解でつくられる。</li>
+      </ul>
+      <div class="kformula">
+        2H<sub>2</sub>O →(電気分解) 2H<sub>2</sub> + O<sub>2</sub><br>
+        Zn + H<sub>2</sub>SO<sub>4</sub> → ZnSO<sub>4</sub> + H<sub>2</sub>
+      </div>
+    </div>
+
+    <!-- 4. 非金属元素の水素化合物（灰） -->
+    <div class="kcard">
+      <div class="kcard-head">
+        <div class="kcard-emoji c4">🔗</div>
+        <div class="kcard-title">非金属元素の水素化合物 <small>沸点 · 了解即可</small></div>
+      </div>
+      <table class="ktable muted">
+        <tr>
+          <th>物質</th><th>名称</th><th>沸点(℃)</th>
+        </tr>
+        <tr><td>CH<sub>4</sub></td><td>メタン</td><td>−161</td></tr>
+        <tr><td>NH<sub>3</sub></td><td>アンモニア</td><td>−33</td></tr>
+        <tr><td>H<sub>2</sub>O</td><td>水</td><td>100</td></tr>
+        <tr><td>HF</td><td>フッ化水素</td><td>20</td></tr>
+        <tr><td>SiH<sub>4</sub></td><td>シラン</td><td>−111</td></tr>
+        <tr><td>PH<sub>3</sub></td><td>ホスフィン</td><td>−88</td></tr>
+        <tr><td>H<sub>2</sub>S</td><td>硫化水素</td><td>−61</td></tr>
+        <tr><td>HCl</td><td>塩化水素</td><td>−85</td></tr>
+      </table>
+    </div>
+
+    <!-- 5. 貴ガスの性質 -->
+    <div class="kcard">
+      <div class="kcard-head">
+        <div class="kcard-emoji c5">🎈</div>
+        <div class="kcard-title">貴ガス（18族）の性質</div>
+      </div>
+      <ul>
+        <li>18族の元素を<b>貴ガス（希ガス）</b>という。</li>
+        <li>単体は<b>単原子分子</b>からなり、無色・無臭の気体で、<b>融点や沸点が低い</b>。</li>
+        <li><b>価電子の数が 0</b> で反応性に乏しく、ほかの元素と化合物をほとんどつくらない。</li>
+        <li>1894年、レイリーとラムゼーは、<b>アルゴン Ar</b> が大気に <b>0.9％</b> 含まれることを発見した。</li>
+      </ul>
+      <div class="subhead">大気中の存在比（了解即可）</div>
+      <table class="ktable muted">
+        <tr>
+          <th>元素</th><th>電子配置</th><th>融点(℃)</th><th>沸点(℃)</th><th>大気中の存在比<br>(体積%)</th>
+        </tr>
+        <tr><td>He</td><td>2</td><td>−269</td><td>−269</td><td>0.000524</td></tr>
+        <tr><td>Ne</td><td>2,8</td><td>−246</td><td>−246</td><td>0.00182</td></tr>
+        <tr><td>Ar</td><td>2,8,8</td><td>−189</td><td>−186</td><td>0.934</td></tr>
+        <tr><td>Kr</td><td>2,8,18,8</td><td>−157</td><td>−152</td><td>0.000114</td></tr>
+        <tr><td>Xe</td><td>2,8,18,18,8</td><td>−112</td><td>−107</td><td>0.000087</td></tr>
+        <tr><td>Rn</td><td>2,8,18,32,18</td><td>−71</td><td>−62</td><td>——</td></tr>
+      </table>
+    </div>
+
+    <!-- 6. ヘリウム He（重点） -->
+    <div class="kcard">
+      <div class="kcard-head">
+        <div class="kcard-emoji c6">🎈</div>
+        <div class="kcard-title">ヘリウム He の性質 <small>重点</small></div>
+      </div>
+      <div class="highlight-box">
+        ヘリウム He は <b>密度が小さく、軽い</b>。<br>
+        そして <b>不燃性</b> である。
+      </div>
+      <ul>
+        <li>密度が小さいため、<b>気球や飛行船の浮揚ガス</b>として利用される。</li>
+        <li>燃えないので、水素のように爆発の危険がない。</li>
+        <li>液体ヘリウムは<b>超伝導磁石の冷却</b>などに利用される。</li>
+        <li class="muted">宇宙では、原子量の小さいヘリウム He が水素の次に多く存在する。</li>
+      </ul>
+    </div>
+
+    <!-- 7. 貴ガスの用途 -->
+    <div class="kcard">
+      <div class="kcard-head">
+        <div class="kcard-emoji c7">💡</div>
+        <div class="kcard-title">貴ガスの用途 <small>用途</small></div>
+      </div>
+      <ul>
+        <li><b>ヘリウム He</b>：<b>密度が小さく軽く、不燃性</b>。気球や飛行船の<b>浮揚ガス</b>として利用。液体ヘリウムは<b>超伝導磁石の冷却</b>などに利用。</li>
+        <li><b>ネオン Ne</b>：ガス中で放電すると赤色光を発するので、<b>広告用放電管</b>に利用。</li>
+        <li><b>アルゴン Ar</b>：貴ガスの中では比較的存在量が多く、<b>蛍光灯に封入</b>されている。</li>
+        <li class="muted">クリプトン Kr：ガスレーザーに利用。</li>
+        <li class="muted">キセノン Xe：キセノンランプに利用。</li>
+        <li class="muted">ラドン Rn：放射性元素。</li>
+      </ul>
+    </div>
+
+    <button class="startbtn" id="startBtn">▶ 开始特训 · 特訓を始める</button>
+    <div class="learnwarn">⚠️ 特训开始后，本页知识点将暂时无法查看</div>
+  </section>
+
+  <!-- ========== 答题页 ========== -->
+  <section id="v-quiz" class="view">
+    <div class="topbar">
+      <div class="qmeta" id="qMeta">第 1 题<small>共 10 题</small></div>
+      <div class="scorechip"><b id="scoreNum">0</b><small>SCORE</small></div>
+    </div>
+
+    <div class="progresswrap">
+      <div class="progress"><div id="bar"></div></div>
+      <span id="pct">0%</span>
+    </div>
+
+    <div class="card" id="questionArea"></div>
+  </section>
+
+  <!-- ========== 结果页 ========== -->
+  <section id="v-result" class="view">
+    <div class="card" id="resultCard"></div>
+  </section>
+
+</div>
+
+<script>
+/* =====================================================================
+   工具
+   ===================================================================== */
+const $ = id => document.getElementById(id);
+const CIRC = '①②③④⑤⑥';
+
+const fmt = s => {
+  let str = String(s == null ? '' : s);
+  str = str.replace(/~(\d+)~/g, '\x00SUP\x00$1\x00SUPEND\x00');
+  str = str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  str = str.replace(/\n/g,'<br>');
+  str = str.replace(/\x00SUP\x00(\d+)\x00SUPEND\x00/g, '<sub>$1</sub>');
+  return str;
+};
+
+function shuffle(a){
+  a = a.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+/* =====================================================================
+   题库（考点：A1/A3、B1-B6、C1-C4、E1-E4、F1-F3、He 密度小轻不燃）
+   ===================================================================== */
+const BANK = [
+/* ===== A. 水素の存在 ===== */
+{t:'single',q:'水素について正しい記述はどれか。',
+ o:['宇宙に最も多く存在する元素である','宇宙で2番目に多く存在する元素である','地球の大気に最も多く含まれる','海水中に最も多く含まれる元素である'],
+ a:0,e:'水素は宇宙に最も多く存在する元素である。'},
+{t:'single',q:'宇宙で水素の次に多く存在する元素はどれか。',
+ o:['ヘリウム','酸素','炭素','窒素'],a:0,
+ e:'宇宙では原子量の小さいヘリウム He が水素の次に多く存在する。'},
+
+/* ===== B. 水素の性質 ===== */
+{t:'single',q:'水素の単体について正しい記述はどれか。',
+ o:['二原子分子 H~2~ で、無色・無臭','単原子分子で、淡青色','二原子分子で、黄緑色','三原子分子で、刺激臭'],a:0,
+ e:'水素の単体は二原子分子 H₂ であり、無色・無臭。'},
+{t:'single',q:'すべての気体の中で最も密度が小さい気体はどれか。',
+ o:['水素','ヘリウム','窒素','酸素'],a:0,
+ e:'水素はすべての気体の中で最も密度が小さい。'},
+{t:'single',q:'加熱した酸化銅(Ⅱ) CuO を水素で還元したときの生成物の組み合わせとして正しいものはどれか。',
+ o:['Cu と H~2~O','Cu と O~2~','CuO と H~2~','Cu(OH)~2~'],a:0,
+ e:'CuO + H₂ → Cu + H₂O。水素は還元剤として働く。'},
+{t:'single',q:'水素と酸素を混合して点火するとどうなるか。',
+ o:['爆発的に反応して水になる','ゆっくり反応して過酸化水素になる','何も起こらない','水素だけが燃える'],a:0,
+ e:'水素 H₂ と酸素 O₂ を混合して点火すると、爆発的に反応して水になる。'},
+{t:'single',q:'燃料電池の負極活物質として期待されている気体はどれか。',
+ o:['水素','酸素','窒素','メタン'],a:0,
+ e:'水素は酸素との反応で水しか生じないことから、燃料電池の負極活物質として期待されている。'},
+{t:'single',q:'水素が還元剤として働くとき、自身はどうなるか。',
+ o:['酸化されて水になる','還元されて水素イオンになる','変化しない','分解して酸素になる'],a:0,
+ e:'水素は相手を還元し、自身は酸化されて H₂O になる。'},
+{t:'single',q:'水素と酸素が反応して水が生じる反応式として正しいものはどれか。',
+ o:['2H~2~ + O~2~ → 2H~2~O','H~2~ + O~2~ → H~2~O~2~','H~2~ + O~2~ → H~2~O','2H~2~ + 2O~2~ → 2H~2~O'],a:0,
+ e:'2H₂ + O₂ → 2H₂O。'},
+
+/* ===== C. 水素の製法 ===== */
+{t:'single',q:'水素の実験室的製法として正しいものはどれか。',
+ o:['亜鉛に希硫酸を加える','銅に濃硝酸を加える','石灰石に塩酸を加える','塩化ナトリウムに濃硫酸を加える'],a:0,
+ e:'Zn + H₂SO₄ → ZnSO₄ + H₂。イオン化傾向の大きい金属に希硫酸などの酸を加えて発生させる。'},
+{t:'single',q:'水素の捕集法として最も適切なものはどれか。',
+ o:['水上置換','上方置換','下方置換','冷却捕集'],a:0,
+ e:'水素は水に溶けにくいので、水上置換で捕集する。'},
+{t:'single',q:'水素の工業的製法として正しいものはどれか。',
+ o:['石油や天然ガスと高温水蒸気との反応','塩化ナトリウム水溶液の電気分解','空気の分留','石灰石の熱分解'],a:0,
+ e:'工業的には、石油や天然ガスと高温水蒸気との反応、または水の電気分解でつくられる。'},
+{t:'single',q:'水の電気分解で陰極に発生する気体はどれか。',
+ o:['水素','酸素','塩素','窒素'],a:0,
+ e:'2H₂O →(電気分解) 2H₂ + O₂。陰極に水素、陽極に酸素が発生する。'},
+{t:'single',q:'水素の実験室的製法の反応式として正しいものはどれか。',
+ o:['Zn + H~2~SO~4~ → ZnSO~4~ + H~2~','Zn + H~2~O → ZnO + H~2~','Zn + 2HCl → ZnCl~2~ + H~2~O','Zn + H~2~SO~4~ → ZnS + H~2~O~2~'],a:0,
+ e:'Zn + H₂SO₄ → ZnSO₄ + H₂。'},
+
+/* ===== E. 貴ガスの性質 ===== */
+{t:'single',q:'18族の元素を何というか。',
+ o:['貴ガス（希ガス）','アルカリ金属','ハロゲン','アルカリ土類金属'],a:0,
+ e:'18族の元素を貴ガス（希ガス）という。'},
+{t:'single',q:'貴ガスの単体の分子の形として正しいものはどれか。',
+ o:['単原子分子','二原子分子','三原子分子','四原子分子'],a:0,
+ e:'貴ガスの単体は単原子分子からなる。'},
+{t:'single',q:'貴ガスの価電子の数はいくつか。',
+ o:['0','1','2','8'],a:0,
+ e:'貴ガスの価電子の数は0で、反応性に乏しい。'},
+{t:'single',q:'貴ガスがほかの元素と化合物をほとんどつくらない理由として正しいものはどれか。',
+ o:['価電子が0で反応性に乏しいから','価電子が1個だから','酸化力が強いから','イオン化傾向が大きいから'],a:0,
+ e:'貴ガスは価電子の数が0で反応性に乏しく、ほかの元素と化合物をほとんどつくらない。'},
+{t:'single',q:'貴ガスの色とにおいについて正しいものはどれか。',
+ o:['無色・無臭','淡青色・特異臭','黄緑色・刺激臭','赤褐色・刺激臭'],a:0,
+ e:'貴ガスの単体は無色・無臭の気体で、融点や沸点が低い。'},
+{t:'single',q:'貴ガスの融点・沸点について正しい記述はどれか。',
+ o:['融点や沸点が低い','融点や沸点が高い','水によく溶ける','強い酸化力をもつ'],a:0,
+ e:'貴ガスは融点や沸点が低い。'},
+{t:'single',q:'1894年にレイリーとラムゼーが発見した、大気に約0.9％含まれる貴ガスはどれか。',
+ o:['アルゴン','ヘリウム','ネオン','キセノン'],a:0,
+ e:'1894年、レイリーとラムゼーはアルゴン Ar が大気に0.9％含まれることを発見した。'},
+
+/* ===== He の重点性質（密度小・軽・不燃） ===== */
+{t:'single',q:'ヘリウム He の性質として正しいものはどれか。',
+ o:['密度が小さく軽く、不燃性','密度が大きく重い','可燃性がある','強い酸化力をもつ'],a:0,
+ e:'ヘリウム He は密度が小さく軽い気体で、不燃性である。'},
+{t:'single',q:'ヘリウム He が気球や飛行船の浮揚ガスとして利用される理由として最も適当なものはどれか。',
+ o:['密度が小さく軽く、燃えないから','水素より安いから','酸化力が強いから','水によく溶けるから'],a:0,
+ e:'ヘリウムは密度が小さく軽く、不燃性のため、気球や飛行船の浮揚ガスとして利用される。'},
+{t:'single',q:'ヘリウム He と水素 H~2~ の性質の違いについて正しいものはどれか。',
+ o:['どちらも軽いが、ヘリウムは不燃性で水素は燃える','どちらも可燃性である','ヘリウムの方が重い','水素は不燃性である'],a:0,
+ e:'ヘリウムは不燃性、水素は可燃性。どちらも軽い気体だが、安全性の面でヘリウムが浮揚ガスに使われる。'},
+
+/* ===== F. 貴ガスの用途 ===== */
+{t:'single',q:'液体ヘリウムの用途として正しいものはどれか。',
+ o:['超伝導磁石の冷却','広告用放電管','蛍光灯封入','ガスレーザー'],a:0,
+ e:'液体ヘリウムは超伝導磁石の冷却などに利用される。'},
+{t:'single',q:'ネオンの用途として正しいものはどれか。',
+ o:['広告用放電管','気球の浮揚ガス','蛍光灯封入','超伝導磁石の冷却'],a:0,
+ e:'ネオンはガス中で放電すると赤色光を発するので、広告用放電管に利用される。'},
+{t:'single',q:'蛍光灯に封入されている貴ガスはどれか。',
+ o:['アルゴン','ネオン','ヘリウム','キセノン'],a:0,
+ e:'アルゴンは貴ガスの中では比較的存在量が多く、蛍光灯に封入されている。'},
+
+/* ===== 填空题 ===== */
+{t:'fill',q:'水素の単体は二原子分子 [ ] である。',
+ bank:['H~2~','H','H~2~O','He','O~2~'],ans:'H~2~',
+ e:'水素の単体は二原子分子 H₂。'},
+{t:'fill',q:'水素は [ ] としての性質をもつため、加熱した酸化銅(Ⅱ) CuO を銅 Cu に還元する。',
+ bank:['還元剤','酸化剤','触媒','溶媒'],ans:'還元剤',
+ e:'水素は還元剤として働き、CuO + H₂ → Cu + H₂O。'},
+{t:'fill',q:'Zn + H~2~SO~4~ → ZnSO~4~ + [ ]',
+ bank:['H~2~','O~2~','SO~2~','H~2~O','ZnO'],ans:'H~2~',
+ e:'Zn + H₂SO₄ → ZnSO₄ + H₂。'},
+{t:'fill',q:'水素と酸素を混合して点火すると、爆発的に反応して [ ] になる。',
+ bank:['水','過酸化水素','オゾン','水素イオン','酸素'],ans:'水',
+ e:'2H₂ + O₂ → 2H₂O。'},
+{t:'fill',q:'18族の元素を [ ] という。',
+ bank:['貴ガス','ハロゲン','アルカリ金属','アルカリ土類金属'],ans:'貴ガス',
+ e:'18族の元素を貴ガス（希ガス）という。'},
+{t:'fill',q:'貴ガスの単体は [ ] 分子からなる。',
+ bank:['単原子','二原子','三原子','四原子'],ans:'単原子',
+ e:'貴ガスの単体は単原子分子からなる。'},
+{t:'fill',q:'貴ガスの価電子の数は [ ] である。',
+ bank:['0','1','2','7','8'],ans:'0',
+ e:'貴ガスの価電子の数は0で反応性に乏しい。'},
+{t:'fill',q:'水素はすべての気体の中で最も [ ] が小さい。',
+ bank:['密度','融点','沸点','分子量'],ans:'密度',
+ e:'水素はすべての気体の中で最も密度が小さい。'},
+{t:'fill',q:'宇宙では原子量の小さい [ ] が水素の次に多く存在する。',
+ bank:['ヘリウム','酸素','炭素','窒素','ネオン'],ans:'ヘリウム',
+ e:'宇宙ではヘリウム He が水素の次に多く存在する。'},
+{t:'fill',q:'ヘリウム He は密度が小さく軽く、[ ] 性をもつ。',
+ bank:['不燃','可燃','酸化','還元'],ans:'不燃',
+ e:'ヘリウム He は密度が小さく軽く、不燃性である。'}
+];
+
+/* =====================================================================
+   状态
+   ===================================================================== */
+const TOTAL_Q = 10;
+const PASS = 7;
+let quiz = [];
+let curIdx = 0;
+let score = 0;
+let answered = false;
+let wrongList = [];
+let fillAns = null;
+
+/* =====================================================================
+   出题
+   ===================================================================== */
+function buildQuiz(){
+  const pool = shuffle(BANK).slice(0, TOTAL_Q);
+  return pool.map(mkQuestion);
+}
+
+function mkQuestion(item){
+  if(item.t === 'single'){
+    const shuf = shuffle(item.o.map((_, i) => i));
+    return {
+      t:'single',
+      q: item.q,
+      o: shuf.map(i => item.o[i]),
+      a: shuf.indexOf(item.a),
+      e: item.e
+    };
+  }
+  return {
+    t:'fill',
+    q: item.q,
+    bank: shuffle(item.bank),
+    ans: item.ans,
+    e: item.e
+  };
+}
+
+/* =====================================================================
+   视图
+   ===================================================================== */
+function showView(v){
+  document.querySelectorAll('.view').forEach(e => e.classList.remove('active'));
+  $('v-' + v).classList.add('active');
+  try{ window.scrollTo({top:0, behavior:'smooth'}); }catch(e){ window.scrollTo(0,0); }
+}
+
+function updateHUD(){
+  const p = Math.round(curIdx / TOTAL_Q * 100);
+  $('bar').style.width = p + '%';
+  $('pct').textContent = p + '%';
+  $('scoreNum').textContent = score;
+  $('qMeta').innerHTML = `第 ${curIdx+1} 题<small>共 ${TOTAL_Q} 题</small>`;
+}
+
+function lockLearn(){
+  const lc = $('learnCard');
+  if(!lc) return;
+  lc.classList.add('locked');
+  lc.disabled = true;
+}
+
+function unlockLearn(){
+  const lc = $('learnCard');
+  if(!lc) return;
+  lc.classList.remove('locked');
+  lc.disabled = false;
+}
+
+/* =====================================================================
+   渲染题目
+   ===================================================================== */
+function renderQuestion(){
+  const q = quiz[curIdx];
+  answered = false;
+  fillAns = null;
+  updateHUD();
+
+  const card = $('questionArea');
+  if(!card) return;
+
+  let html = '';
+
+  if(q.t === 'single'){
+    html += `<span class="qtag">单选题 · 4択</span>`;
+    html += `<div class="qtext">${fmt(q.q)}</div>`;
+    html += `<div class="options" id="optBox">`;
+    q.o.forEach((o, i) => {
+      html += `<button class="opt" data-i="${i}">
+        <span class="num">${CIRC[i]}</span>
+        <span class="txt">${fmt(o)}</span>
+      </button>`;
+    });
+    html += `</div>`;
+  }else{
+    html += `<span class="qtag fill">填空题 · 穴埋め</span>`;
+    const parts = q.q.split(/\[\s*\]/);
+    let qt = '';
+    parts.forEach((p, i) => {
+      qt += fmt(p);
+      if(i < parts.length - 1) qt += `<span class="slot empty" id="slotEl">点击选择</span>`;
+    });
+    html += `<div class="qtext">${qt}</div>`;
+    html += `<div class="bank" id="bankBox">`;
+    q.bank.forEach(b => {
+      html += `<button class="chip" data-v="${b}">${fmt(b)}</button>`;
+    });
+    html += `</div>`;
+    html += `<button class="confirmbtn" id="confirmBtn" disabled>✓ 确认作答</button>`;
+  }
+
+  html += `<div id="fbArea"></div>`;
+  card.innerHTML = html;
+
+  if(q.t === 'single'){
+    card.querySelectorAll('.opt').forEach(btn => {
+      btn.addEventListener('click', () => submitSingle(parseInt(btn.dataset.i, 10)));
+    });
+  }else{
+    const slotEl = $('slotEl');
+    const confirmBtn = $('confirmBtn');
+    card.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        if(answered) return;
+        fillAns = chip.dataset.v;
+        slotEl.className = 'slot filled';
+        slotEl.innerHTML = fmt(fillAns);
+        confirmBtn.disabled = false;
+        card.querySelectorAll('.chip').forEach(c => c.classList.remove('used'));
+        chip.classList.add('used');
+      });
+    });
+    slotEl.addEventListener('click', () => {
+      if(answered) return;
+      fillAns = null;
+      slotEl.className = 'slot empty';
+      slotEl.textContent = '点击选择';
+      confirmBtn.disabled = true;
+      card.querySelectorAll('.chip').forEach(c => c.classList.remove('used'));
+    });
+    confirmBtn.addEventListener('click', () => {
+      if(!answered && fillAns) submitFill(fillAns);
+    });
+  }
+
+  card.style.animation = 'none';
+  void card.offsetWidth;
+  card.style.animation = 'pop .42s cubic-bezier(.34,1.56,.64,1)';
+}
+
+/* =====================================================================
+   判题
+   ===================================================================== */
+function submitSingle(i){
+  if(answered) return;
+  answered = true;
+
+  const q = quiz[curIdx];
+  const correct = (i === q.a);
+  document.querySelectorAll('#optBox > .opt').forEach((b, idx) => {
+    b.disabled = true;
+    if(idx === q.a) b.classList.add('correct');
+    else if(idx === i) b.classList.add('wrong');
+    else b.classList.add('dim');
+  });
+
+  finishQuestion(correct, q, i);
+}
+
+function submitFill(val){
+  if(answered) return;
+  answered = true;
+
+  const q = quiz[curIdx];
+  const norm = s => String(s).replace(/[~\s]/g,'');
+  const correct = (norm(val) === norm(q.ans));
+
+  const slotEl = $('slotEl');
+  if(slotEl){
+    slotEl.className = 'slot ' + (correct ? 'correct' : 'wrong');
+    slotEl.innerHTML = fmt(val);
+  }
+
+  if(!correct && slotEl && slotEl.parentElement){
+    const hint = document.createElement('div');
+    hint.style.cssText = 'margin-top:14px;font-size:13.5px;color:#059669;font-weight:800;text-align:center;';
+    hint.innerHTML = `正解は「${fmt(q.ans)}」`;
+    slotEl.parentElement.appendChild(hint);
+  }
+
+  const cb = $('confirmBtn');
+  if(cb) cb.style.display = 'none';
+  document.querySelectorAll('.chip').forEach(c => c.disabled = true);
+
+  finishQuestion(correct, q, val);
+}
+
+function finishQuestion(correct, q, userAns){
+  if(correct){
+    score++;
+    $('scoreNum').textContent = score;
+  }else{
+    let yourText = '—';
+    let ansText = '—';
+    try{
+      if(q.t === 'single'){
+        yourText = q.o[userAns] || '—';
+        ansText = q.o[q.a];
+      }else{
+        yourText = userAns || '—';
+        ansText = q.ans;
+      }
+    }catch(err){}
+
+    wrongList.push({ idx: curIdx + 1, q: q.q, your: yourText, ans: ansText });
+  }
+
+  const isLast = (curIdx === TOTAL_Q - 1);
+  const fb = $('fbArea');
+  if(!fb) return;
+
+  fb.innerHTML = `<div class="feedback ${correct ? 'ok' : 'no'}">
+    <div class="fb-title">${correct ? '🎉 答对了！' : '❌ 再想想…'}</div>
+    <div class="fb-body">${fmt(q.e)}</div>
+    <button class="nextbtn" id="nextBtn" onclick="goNext(${isLast})">
+      ${isLast ? '🏁 查看结果' : '下一题 →'}
+    </button>
+  </div>`;
+
+  try{ fb.scrollIntoView({behavior:'smooth', block:'nearest'}); }catch(e){}
+}
+
+window.goNext = function(isLast){
+  if(isLast){
+    showResult();
+  }else{
+    curIdx++;
+    renderQuestion();
+    try{ window.scrollTo({top:0, behavior:'smooth'}); }catch(e){ window.scrollTo(0,0); }
+  }
+};
+
+/* =====================================================================
+   结果
+   ===================================================================== */
+const TITLES = [
+  {min:10, name:'水素と希ガスの神様', cn:'氢与稀有气体之神', emoji:'👑', msg:'全问正确！完美通关。'},
+  {min:9,  name:'希ガスマスター',   cn:'稀有气体大师',     emoji:'🏆', msg:'只差一步就满分！实力很强。'},
+  {min:8,  name:'還元反応の匠',     cn:'还原反应工匠',     emoji:'💎', msg:'成绩出色！掌握得很扎实。'},
+  {min:7,  name:'気体の専門家',     cn:'气体专家',         emoji:'⭐', msg:'通过合格线！继续保持。'},
+  {min:0,  name:'再挑戦の戦士',     cn:'再挑战的战士',     emoji:'🥲', msg:'再来一次，把称号拿到手！'}
+];
+
+function showResult(){
+  $('bar').style.width = '100%';
+  $('pct').textContent = '100%';
+
+  const rate = Math.round(score / TOTAL_Q * 100);
+  const t = TITLES.find(x => score >= x.min);
+  const passed = score >= PASS;
+
+  const R = 72, C = 2*Math.PI*R;
+  const dash = C * rate / 100;
+
+  let html = `<div class="result">
+    <div class="emoji">${t.emoji}</div>`;
+
+  if(passed){
+    html += `<h2>特训通过！</h2>
+      <div class="title-badge">${t.cn} · ${t.name}</div>`;
+  }else{
+    html += `<h2>差一点点！</h2>
+      <div class="title-badge" style="background:linear-gradient(135deg,#94a3b8,#64748b);box-shadow:0 8px 24px rgba(100,116,139,.34);">${t.cn} · ${t.name}</div>`;
+  }
+
+  html += `<p class="sub">${t.msg}</p>`;
+
+  html += `<div class="ring">
+    <svg width="180" height="180">
+      <circle cx="90" cy="90" r="${R}" fill="none" stroke="#eef2ff" stroke-width="15"/>
+      <circle cx="90" cy="90" r="${R}" fill="none" stroke="url(#gr)" stroke-width="15"
+        stroke-linecap="round" stroke-dasharray="${dash} ${C-dash}"/>
+      <defs><linearGradient id="gr" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#0ea5e9"/>
+        <stop offset="50%" stop-color="#6366f1"/>
+        <stop offset="100%" stop-color="#ec4899"/>
+      </linearGradient></defs>
+    </svg>
+    <div class="inner">
+      <div class="bignum">${score}<small>/${TOTAL_Q}</small></div>
+      <div style="font-size:13px;color:#94a3b8;margin-top:4px;">正确率 ${rate}%</div>
+    </div>
+  </div>`;
+
+  if(wrongList.length){
+    html += `<div class="review"><h3>📝 错题回顾</h3>
+      ${wrongList.map(w => `
+        <div class="item">
+          <span class="tag">第${w.idx}题</span>
+          <span style="flex:1;">
+            <div style="color:#334155;margin-bottom:5px;">${fmt(w.q)}</div>
+            <div style="font-size:12.5px;color:#ef4444;">你的答案：${fmt(w.your)}</div>
+            <div style="font-size:12.5px;color:#059669;">正确答案：<span class="ans">${fmt(w.ans)}</span></div>
+          </span>
+        </div>`).join('')}
+    </div>`;
+  }else{
+    html += `<div class="review" style="text-align:center;"><h3 style="margin-bottom:0;">✨ 全问正确！完美通关！</h3></div>`;
+  }
+
+  html += `<div class="resultbtns">
+    <button class="again" id="againBtn">🔄 再挑战一次</button>
+    <button class="homebtn" id="homeBtn">🏠 返回首页</button>
+  </div></div>`;
+
+  $('resultCard').innerHTML = html;
+  $('againBtn').addEventListener('click', startQuiz);
+  $('homeBtn').addEventListener('click', () => {
+    unlockLearn();
+    showView('home');
+  });
+
+  showView('result');
+  if(passed) setTimeout(celebrate, 160);
+}
+
+/* =====================================================================
+   庆祝动画
+   ===================================================================== */
+function celebrate(){
+  const cv = $('confetti');
+  cv.width = window.innerWidth;
+  cv.height = window.innerHeight;
+  cv.style.display = 'block';
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  const colors = ['#0ea5e9','#38bdf8','#6366f1','#a855f7','#ec4899','#f59e0b','#10b981','#f43f5e','#fbbf24','#22c55e'];
+
+  const ribbons = [];
+  for(let i=0;i<170;i++){
+    ribbons.push({
+      x: Math.random()*W, y: -Math.random()*H*0.9,
+      w: 5 + Math.random()*9, h: 3 + Math.random()*7,
+      vx: (Math.random()-0.5)*3.2, vy: 1.8 + Math.random()*4.5,
+      rot: Math.random()*Math.PI*2, vr: (Math.random()-0.5)*0.24,
+      c: colors[Math.floor(Math.random()*colors.length)],
+      shape: Math.random() < 0.35 ? 'circle' : 'rect',
+      wob: Math.random()*Math.PI*2
+    });
+  }
+
+  const stars = [];
+  const cx = W/2, cy = H*0.42;
+  for(let i=0;i<85;i++){
+    const angle = Math.random()*Math.PI*2;
+    const speed = 7 + Math.random()*13;
+    stars.push({
+      x: cx, y: cy,
+      vx: Math.cos(angle)*speed, vy: Math.sin(angle)*speed,
+      life: 1, decay: 0.006 + Math.random()*0.006,
+      size: 3.5 + Math.random()*4.5,
+      c: colors[Math.floor(Math.random()*colors.length)]
+    });
+  }
+
+  const bursts = [];
+  function addBurst(x, y, count){
+    for(let i=0;i<(count||55);i++){
+      const angle = Math.random()*Math.PI*2;
+      const speed = 3 + Math.random()*11;
+      bursts.push({
+        x, y,
+        vx: Math.cos(angle)*speed, vy: Math.sin(angle)*speed,
+        life: 1, decay: 0.009 + Math.random()*0.012,
+        size: 2 + Math.random()*4.5,
+        c: colors[Math.floor(Math.random()*colors.length)]
+      });
+    }
+  }
+
+  const burstPlan = [
+    {t:120,  x:W*0.18, y:H*0.30, n:50},
+    {t:260,  x:W*0.82, y:H*0.32, n:50},
+    {t:420,  x:W*0.50, y:H*0.55, n:70},
+    {t:620,  x:W*0.30, y:H*0.20, n:45},
+    {t:780,  x:W*0.70, y:H*0.22, n:45},
+    {t:1000, x:W*0.15, y:H*0.60, n:55},
+    {t:1200, x:W*0.85, y:H*0.58, n:55},
+    {t:1450, x:W*0.50, y:H*0.18, n:80}
+  ];
+  burstPlan.forEach(b => setTimeout(()=>addBurst(b.x, b.y, b.n), b.t));
+
+  let t = 0;
+  const maxT = 540;
+
+  (function loop(){
+    ctx.clearRect(0,0,W,H);
+    t++;
+
+    ribbons.forEach(p => {
+      p.wob += 0.06;
+      p.x += p.vx + Math.sin(p.wob)*0.7;
+      p.y += p.vy;
+      p.rot += p.vr;
+      p.vy += 0.075;
+      p.vx *= 0.995;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.fillStyle = p.c;
+      ctx.globalAlpha = Math.max(0, 1 - t/maxT);
+      if(p.shape === 'circle'){
+        ctx.beginPath();
+        ctx.arc(0,0,p.w/2,0,Math.PI*2);
+        ctx.fill();
+      }else{
+        ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+      }
+      ctx.restore();
+    });
+
+    stars.forEach(s => {
+      s.x += s.vx; s.y += s.vy;
+      s.vy += 0.2;
+      s.vx *= 0.965; s.vy *= 0.965;
+      s.life -= s.decay;
+      if(s.life <= 0) return;
+      ctx.save();
+      ctx.translate(s.x, s.y);
+      ctx.globalAlpha = s.life;
+      ctx.fillStyle = s.c;
+      ctx.shadowColor = s.c;
+      ctx.shadowBlur = 16;
+      ctx.beginPath();
+      const spikes = 5;
+      for(let k=0;k<spikes;k++){
+        const a1 = -Math.PI/2 + k*Math.PI*2/spikes;
+        const a2 = a1 + Math.PI/spikes;
+        const r1 = s.size * s.life;
+        const r2 = r1 * 0.42;
+        if(k === 0) ctx.moveTo(Math.cos(a1)*r1, Math.sin(a1)*r1);
+        else ctx.lineTo(Math.cos(a1)*r1, Math.sin(a1)*r1);
+        ctx.lineTo(Math.cos(a2)*r2, Math.sin(a2)*r2);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    });
+
+    bursts.forEach(b => {
+      b.x += b.vx; b.y += b.vy;
+      b.vy += 0.09;
+      b.vx *= 0.965;
+      b.vy *= 0.965;
+      b.life -= b.decay;
+      if(b.life <= 0) return;
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, b.life);
+      ctx.fillStyle = b.c;
+      ctx.shadowColor = b.c;
+      ctx.shadowBlur = 18;
+      ctx.beginPath();
+      ctx.arc(b.x, b.y, b.size * b.life, 0, Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+    });
+
+    for(let i=bursts.length-1;i>=0;i--){
+      if(bursts[i].life <= 0) bursts.splice(i,1);
+    }
+
+    if(t < maxT || bursts.length > 0){
+      requestAnimationFrame(loop);
+    }else{
+      ctx.clearRect(0,0,W,H);
+      cv.style.display = 'none';
+    }
+  })();
+}
+
+/* =====================================================================
+   启动
+   ===================================================================== */
+function startQuiz(){
+  lockLearn();
+  quiz = buildQuiz();
+  curIdx = 0;
+  score = 0;
+  wrongList = [];
+  $('scoreNum').textContent = '0';
+  showView('quiz');
+  renderQuestion();
+}
+
+$('learnCard').addEventListener('click', () => showView('learn'));
+$('startCard').addEventListener('click', startQuiz);
+$('startBtn').addEventListener('click', startQuiz);
+
+document.addEventListener('keydown', e => {
+  if(!$('v-quiz').classList.contains('active')) return;
+  const q = quiz[curIdx];
+  if(!q || answered) return;
+
+  if(/^[1-4]$/.test(e.key)){
+    const idx = parseInt(e.key,10) - 1;
+    const btns = document.querySelectorAll('#optBox > .opt');
+    if(btns[idx]){ e.preventDefault(); btns[idx].click(); }
+    return;
+  }
+  if(e.key === 'Enter'){
+    const nb = $('nextBtn');
+    if(nb){ e.preventDefault(); nb.click(); return; }
+    const cb = $('confirmBtn');
+    if(cb && !cb.disabled){ e.preventDefault(); cb.click(); }
+  }
+});
+
+$('dbCount').textContent = BANK.length;
+</script>
+</body>
+</html>
