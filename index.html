@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>无机化学 特训道场</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP","Microsoft YaHei",sans-serif;
+  background:#eef6ff;
+  background-image:
+    radial-gradient(at 0% 0%, #cffafe 0px, transparent 55%),
+    radial-gradient(at 100% 0%, #dbeafe 0px, transparent 55%),
+    radial-gradient(at 50% 100%, #e0e7ff 0px, transparent 55%);
+  background-attachment:fixed;
+  min-height:100vh;color:#1e293b;padding:28px 16px 70px;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:960px;margin:0 auto;}
+
+/* 顶部 */
+.hero{text-align:center;margin-bottom:28px;}
+.hero .icon{
+  width:100px;height:100px;margin:0 auto 18px;border-radius:30px;
+  background:linear-gradient(135deg,#0ea5e9,#6366f1,#a855f7);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 22px 52px rgba(99,102,241,.45);
+  animation:float 3.6s ease-in-out infinite;
+  position:relative;overflow:hidden;
+}
+.hero .icon::before{
+  content:"";position:absolute;top:-40%;left:-40%;
+  width:80%;height:80%;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.4),transparent 70%);
+}
+@keyframes float{0%,100%{transform:translateY(0) rotate(-2deg);}50%{transform:translateY(-10px) rotate(2deg);}}
+.hero h1{font-size:30px;font-weight:900;letter-spacing:.5px;margin-bottom:6px;}
+.hero .sub{font-size:15px;color:#6366f1;font-weight:800;margin-bottom:12px;letter-spacing:1px;}
+.hero p{font-size:14px;color:#64748b;line-height:1.8;}
+
+/* 统计 */
+.statrow{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:28px;}
+@media(max-width:560px){.statrow{gap:8px;}}
+.statbox{
+  background:#fff;border-radius:20px;padding:18px 8px;text-align:center;
+  border:1.5px solid #e8eeff;box-shadow:0 8px 24px rgba(99,102,241,.07);
+}
+.statbox b{font-size:26px;font-weight:900;color:#6366f1;display:block;line-height:1.15;}
+.statbox small{font-size:11.5px;color:#94a3b8;letter-spacing:.5px;font-weight:700;}
+
+/* 区块标题 */
+.section-title{
+  display:flex;align-items:center;gap:12px;margin:0 0 16px 4px;
+  font-size:15px;font-weight:900;color:#475569;letter-spacing:.5px;
+}
+.section-title .bar{
+  width:4px;height:18px;border-radius:2px;
+  background:linear-gradient(180deg,#38bdf8,#6366f1);
+}
+.section-title small{font-size:12px;color:#94a3b8;font-weight:700;margin-left:4px;}
+
+/* 模块网格 */
+.grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:14px;
+  margin-bottom:30px;
+}
+@media(max-width:760px){.grid{grid-template-columns:repeat(2,1fr);gap:10px;}}
+@media(max-width:420px){.grid{grid-template-columns:1fr;}}
+
+.module{
+  background:#fff;border:2px solid #e8eeff;border-radius:22px;
+  padding:22px 16px 20px;text-align:center;cursor:pointer;
+  transition:.24s cubic-bezier(.4,0,.2,1);font-family:inherit;
+  box-shadow:0 8px 24px rgba(99,102,241,.06);
+  position:relative;overflow:hidden;
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  min-height:170px;justify-content:center;
+}
+.module:not(.locked):hover{
+  transform:translateY(-6px);border-color:#a5b4fc;
+  box-shadow:0 18px 40px rgba(99,102,241,.24);
+}
+.module .micon{
+  width:76px;height:76px;margin-bottom:8px;
+  transition:.28s cubic-bezier(.34,1.56,.64,1);display:block;
+  filter:drop-shadow(0 6px 14px rgba(99,102,241,.22));
+}
+.module .micon svg{width:100%;height:100%;display:block;}
+.module:not(.locked):hover .micon{
+  transform:scale(1.1) rotate(-4deg);
+  filter:drop-shadow(0 10px 22px rgba(99,102,241,.38));
+}
+.module .mtitle{font-size:15px;font-weight:900;color:#334155;line-height:1.4;}
+.module .mcn{font-size:11.5px;color:#94a3b8;font-weight:700;letter-spacing:.3px;}
+.module .mstatus{
+  font-size:10.5px;font-weight:800;padding:4px 12px;border-radius:99px;
+  margin-top:8px;letter-spacing:.5px;
+}
+.module.open{
+  background:linear-gradient(160deg,#ffffff 0%,#f5f3ff 100%);
+  border-color:#a5b4fc;
+  box-shadow:0 14px 36px rgba(99,102,241,.22);
+}
+.module.open .mstatus{
+  background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;
+  box-shadow:0 4px 12px rgba(99,102,241,.38);
+  animation:pulse 2.2s ease-in-out infinite;
+}
+@keyframes pulse{
+  0%,100%{transform:scale(1);box-shadow:0 4px 12px rgba(99,102,241,.38);}
+  50%{transform:scale(1.04);box-shadow:0 6px 18px rgba(99,102,241,.55);}
+}
+.module.open:hover{
+  transform:translateY(-7px);
+  border-color:#818cf8;
+  box-shadow:0 22px 48px rgba(99,102,241,.36);
+}
+.module.locked{
+  background:#f8faff;border-color:#eef2ff;cursor:not-allowed;
+}
+.module.locked .micon{opacity:.55;filter:grayscale(.5) drop-shadow(0 4px 8px rgba(0,0,0,.08));}
+.module.locked .mtitle{color:#94a3b8;}
+.module.locked .mstatus{
+  background:#eef2ff;color:#a5b4fc;
+}
+
+/* 底部 */
+.footer-note{
+  background:#fff;border:1.5px solid #e8eeff;border-radius:18px;
+  padding:18px 22px;text-align:center;font-size:13px;
+  color:#64748b;line-height:1.9;box-shadow:0 8px 24px rgba(99,102,241,.06);
+}
+.footer-note b{color:#6366f1;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="icon">
+      <svg viewBox="0 0 64 64" width="62" height="62">
+        <path d="M26 8 L26 26 L14 50 Q13 54 17 54 L47 54 Q51 54 50 50 L38 26 L38 8 Z"
+              fill="#ffffff" fill-opacity="0.95" stroke="#ffffff" stroke-width="2.5" stroke-linejoin="round"/>
+        <line x1="24" y1="8" x2="40" y2="8" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/>
+        <circle cx="24" cy="44" r="2.5" fill="#a855f7"/>
+        <circle cx="34" cy="48" r="2" fill="#ec4899"/>
+        <circle cx="40" cy="42" r="2.2" fill="#6366f1"/>
+      </svg>
+    </div>
+    <h1>无机化学 特训道场</h1>
+    <div class="sub">無機化学 特訓道場</div>
+    <p>选择一个模块开始特训<br>每个模块 10 道题，7 分以上合格</p>
+  </div>
+
+  <div class="statrow">
+    <div class="statbox"><b>14</b><small>知识模块</small></div>
+    <div class="statbox"><b>1</b><small>已开放</small></div>
+    <div class="statbox"><b>7</b><small>合格线</small></div>
+  </div>
+
+  <div class="section-title">
+    <span class="bar"></span>
+    非金属元素
+    <small>非金属元素</small>
+  </div>
+  <div class="grid" id="gridNonmetal"></div>
+
+  <div class="section-title">
+    <span class="bar"></span>
+    典型金属元素
+    <small>典型金属元素</small>
+  </div>
+  <div class="grid" id="gridMetal"></div>
+
+  <div class="section-title">
+    <span class="bar"></span>
+    遷移金属元素
+    <small>过渡金属元素</small>
+  </div>
+  <div class="grid" id="gridTransition"></div>
+
+  <div class="section-title">
+    <span class="bar"></span>
+    综合
+    <small>まとめ</small>
+  </div>
+  <div class="grid" id="gridSummary"></div>
+
+  <div class="footer-note">
+    💡 每个模块点进去后，先可以查看<b>知识要点</b>，再开始答题。<br>
+    ⚠️ 答题过程中知识要点会锁定，答完返回首页即可重新查看。
+  </div>
+
+</div>
+
+<script>
+/* =====================================================================
+   通用 App 风格图标工厂
+   ===================================================================== */
+let __iconSeq = 0;
+function nextId(){ return 'grad' + (++__iconSeq) + '_' + Math.random().toString(36).slice(2,7); }
+
+function appIcon(c1, c2, inner){
+  const id = nextId();
+  return `<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="${id}" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="${c1}"/>
+        <stop offset="100%" stop-color="${c2}"/>
+      </linearGradient>
+    </defs>
+    <rect x="2" y="2" width="60" height="60" rx="18" fill="url(#${id})"/>
+    <path d="M2 30 Q2 20 18 20 L46 20 Q62 20 62 30 L62 20 Q62 2 44 2 L20 2 Q2 2 2 20 Z"
+          fill="#ffffff" opacity="0.18"/>
+    ${inner}
+  </svg>`;
+}
+
+/* ---- 元素符号图标 ---- */
+function atomIcon(symbol, c1, c2){
+  const fsize = symbol.length >= 2 ? 20 : 28;
+  return appIcon(c1, c2, `
+    <text x="32" y="${32 + fsize*0.36}" text-anchor="middle"
+          font-family="Helvetica,Arial,sans-serif"
+          font-size="${fsize}" font-weight="900"
+          fill="#ffffff" letter-spacing="-0.5">${symbol}</text>
+  `);
+}
+
+/* ---- 双元素图标 ---- */
+function dualAtomIcon(s1, s2, c1, c2){
+  return appIcon(c1, c2, `
+    <circle cx="23" cy="36" r="13" fill="#ffffff" opacity="0.95"/>
+    <text x="23" y="${36 + 5}" text-anchor="middle"
+          font-family="Helvetica,Arial,sans-serif"
+          font-size="14" font-weight="900"
+          fill="${c1}">${s1}</text>
+    <circle cx="44" cy="26" r="12" fill="#ffffff" opacity="0.82"/>
+    <text x="44" y="${26 + 4.5}" text-anchor="middle"
+          font-family="Helvetica,Arial,sans-serif"
+          font-size="13" font-weight="900"
+          fill="${c2}">${s2}</text>
+  `);
+}
+
+/* ---- 气球（气体） ---- */
+function gasIcon(c1, c2){
+  return appIcon(c1, c2, `
+    <ellipse cx="32" cy="25" rx="14" ry="16" fill="#ffffff" opacity="0.95"/>
+    <ellipse cx="27" cy="19" rx="4" ry="5" fill="#ffffff" opacity="0.7"/>
+    <ellipse cx="27" cy="19" rx="2" ry="3" fill="${c1}" opacity="0.28"/>
+    <path d="M28 41 Q27 47 29 50 Q31 51.5 32 51.5 Q33 51.5 35 50 Q37 47 36 41 Z"
+          fill="#ffffff" opacity="0.9"/>
+  `);
+}
+
+/* ---- 钻石晶体（碳・硅） ---- */
+function crystalIcon(c1, c2){
+  return appIcon(c1, c2, `
+    <path d="M32 9 L52 26 L43 55 L21 55 L12 26 Z"
+          fill="#ffffff" opacity="0.95" stroke="#ffffff" stroke-width="1.5" stroke-linejoin="round"/>
+    <path d="M12 26 L52 26" stroke="${c2}" stroke-width="1.5" opacity="0.55"/>
+    <path d="M32 9 L32 55" stroke="${c2}" stroke-width="1.5" opacity="0.55"/>
+    <path d="M20 26 L32 9 L44 26 Z" fill="${c1}" opacity="0.22"/>
+  `);
+}
+
+/* ---- 齿轮（两性金属） ---- */
+function gearIcon(c1, c2){
+  let teeth = '';
+  for(let i=0;i<8;i++){
+    const a = i * Math.PI / 4;
+    const x1 = 32 + Math.cos(a)*18;
+    const y1 = 32 + Math.sin(a)*18;
+    const x2 = 32 + Math.cos(a)*24;
+    const y2 = 32 + Math.sin(a)*24;
+    teeth += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}"
+              stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>`;
+  }
+  return appIcon(c1, c2, `
+    ${teeth}
+    <circle cx="32" cy="32" r="18" fill="#ffffff"/>
+    <circle cx="32" cy="32" r="9" fill="${c1}"/>
+    <circle cx="32" cy="32" r="4" fill="${c2}" opacity="0.6"/>
+  `);
+}
+
+/* ---- 芯片（生活中的过渡金属） ---- */
+function chipIcon(c1, c2){
+  let pins = '';
+  const pinPos = [22, 32, 42];
+  pinPos.forEach(p => {
+    pins += `<line x1="${p}" y1="10" x2="${p}" y2="17" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>`;
+    pins += `<line x1="${p}" y1="47" x2="${p}" y2="54" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>`;
+    pins += `<line x1="10" y1="${p}" x2="17" y2="${p}" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>`;
+    pins += `<line x1="47" y1="${p}" x2="54" y2="${p}" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>`;
+  });
+  return appIcon(c1, c2, `
+    ${pins}
+    <rect x="17" y="17" width="30" height="30" rx="4" fill="#ffffff"/>
+    <rect x="24" y="24" width="16" height="16" rx="2" fill="${c1}"/>
+    <rect x="28" y="28" width="8" height="8" rx="1" fill="${c2}" opacity="0.7"/>
+  `);
+}
+
+/* ---- 奖杯（综合） ---- */
+function trophyIcon(c1, c2){
+  return appIcon(c1, c2, `
+    <path d="M20 14 L44 14 L44 28 Q44 39 32 42 Q20 39 20 28 Z"
+          fill="#ffffff" opacity="0.98"/>
+    <path d="M16 17 Q11 17 11 23 Q11 30 19 30" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+    <path d="M48 17 Q53 17 53 23 Q53 30 45 30" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+    <line x1="32" y1="42" x2="32" y2="49" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/>
+    <rect x="22" y="49" width="20" height="5" rx="2" fill="#ffffff"/>
+    <path d="M26 20 L38 20" stroke="${c1}" stroke-width="2" opacity="0.4"/>
+  `);
+}
+
+/* =====================================================================
+   模块列表（★ 链接指向 H+He.html）
+   ===================================================================== */
+const MODULES = {
+  nonmetal: [
+    { key:'hydrogen', title:'水素と希ガス', cn:'氢与稀有气体', status:'open', href:'H+He.html',
+      icon: atomIcon('H','#0ea5e9','#4f46e5') },
+    { key:'halogen',  title:'ハロゲン',     cn:'卤素',         status:'locked',
+      icon: atomIcon('Cl','#10b981','#047857') },
+    { key:'oxygens',  title:'酸素と硫黄',   cn:'氧与硫',       status:'locked',
+      icon: dualAtomIcon('O','S','#fbbf24','#f97316') },
+    { key:'nitrogen', title:'窒素とリン',   cn:'氮与磷',       status:'locked',
+      icon: dualAtomIcon('N','P','#a78bfa','#7c3aed') },
+    { key:'carbon',   title:'炭素とケイ素', cn:'碳与硅',       status:'locked',
+      icon: crystalIcon('#38bdf8','#0284c7') },
+    { key:'gas',      title:'気体性質総合', cn:'气体性质总合', status:'locked',
+      icon: gasIcon('#22d3ee','#0891b2') }
+  ],
+  metal: [
+    { key:'alkali',    title:'アルカリ金属',     cn:'碱金属',   status:'locked',
+      icon: atomIcon('Na','#f87171','#dc2626') },
+    { key:'alkaline',  title:'アルカリ土類金属', cn:'碱土金属', status:'locked',
+      icon: atomIcon('Ca','#fb923c','#ea580c') },
+    { key:'amphoteric',title:'両性金属',         cn:'两性金属', status:'locked',
+      icon: gearIcon('#c084fc','#9333ea') }
+  ],
+  transition: [
+    { key:'iron',      title:'鉄',               cn:'铁',             status:'locked',
+      icon: atomIcon('Fe','#94a3b8','#475569') },
+    { key:'copper',    title:'銅と銀',           cn:'铜与银',         status:'locked',
+      icon: dualAtomIcon('Cu','Ag','#fbbf24','#b45309') },
+    { key:'chromium',  title:'クロムとマンガン', cn:'铬与锰',         status:'locked',
+      icon: dualAtomIcon('Cr','Mn','#e879f9','#a21caf') },
+    { key:'daily',     title:'生活中の遷移金属', cn:'生活中的过渡金属', status:'locked',
+      icon: chipIcon('#60a5fa','#1d4ed8') }
+  ],
+  summary: [
+    { key:'all', title:'無機総合', cn:'无机综合', status:'locked',
+      icon: trophyIcon('#fde047','#ca8a04') }
+  ]
+};
+
+/* =====================================================================
+   渲染
+   ===================================================================== */
+function renderModule(m){
+  const cls = m.status === 'open' ? 'open' : 'locked';
+  const statusText = m.status === 'open' ? '▶ 开始答题' : '🔒 即将开放';
+  const tag = m.status === 'open' ? 'button' : 'div';
+  const onclick = m.status === 'open'
+    ? `onclick="location.href=encodeURI('${m.href}')"`
+    : '';
+
+  return `<${tag} class="module ${cls}" ${onclick}>
+    <div class="micon">${m.icon}</div>
+    <div class="mtitle">${m.title}</div>
+    <div class="mcn">${m.cn}</div>
+    <div class="mstatus">${statusText}</div>
+  </${tag}>`;
+}
+
+function renderGroup(id, list){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.innerHTML = list.map(renderModule).join('');
+}
+
+renderGroup('gridNonmetal',   MODULES.nonmetal);
+renderGroup('gridMetal',      MODULES.metal);
+renderGroup('gridTransition', MODULES.transition);
+renderGroup('gridSummary',    MODULES.summary);
+</script>
+</body>
+</html>
