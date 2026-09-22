@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>卤素 特训道场</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP","Microsoft YaHei",sans-serif;
+  background:#f0fdf4;
+  background-image:
+    radial-gradient(at 0% 0%, #dcfce7 0px, transparent 55%),
+    radial-gradient(at 100% 0%, #ecfdf5 0px, transparent 55%),
+    radial-gradient(at 50% 100%, #d1fae5 0px, transparent 55%);
+  background-attachment:fixed;
+  min-height:100vh;color:#1e293b;padding:22px 14px 120px;
+  -webkit-font-smoothing:antialiased;
+}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:999;display:none;}
+.wrap{max-width:860px;margin:0 auto;}
+.view{display:none;}
+.view.active{display:block;animation:pop .42s cubic-bezier(.34,1.56,.64,1);}
+@keyframes pop{from{opacity:0;transform:translateY(18px) scale(.985);}to{opacity:1;transform:none;}}
+
+/* ===== 悬浮返回按钮 ===== */
+.fab{
+  display:none;
+  position:fixed;
+  left:18px;
+  bottom:22px;
+  z-index:300;
+  align-items:center;
+  gap:8px;
+  padding:14px 22px;
+  border-radius:99px;
+  border:none;
+  background:linear-gradient(135deg,#22c55e,#15803d);
+  color:#fff;
+  font-family:inherit;
+  font-size:15px;
+  font-weight:900;
+  letter-spacing:.4px;
+  cursor:pointer;
+  transition:transform .22s cubic-bezier(.34,1.56,.64,1), box-shadow .22s;
+  box-shadow:0 12px 30px rgba(34,197,94,.5), 0 0 0 0 rgba(34,197,94,.4);
+  animation:fabPulse 2.6s ease-in-out infinite;
+}
+@keyframes fabPulse{
+  0%,100%{box-shadow:0 12px 30px rgba(34,197,94,.5), 0 0 0 0 rgba(34,197,94,.4);}
+  50%{box-shadow:0 12px 30px rgba(34,197,94,.55), 0 0 0 10px rgba(34,197,94,0);}
+}
+.fab:hover{
+  transform:translateY(-4px) scale(1.04);
+  box-shadow:0 18px 42px rgba(34,197,94,.65), 0 0 0 0 rgba(34,197,94,0);
+}
+.fab:active{transform:translateY(-1px) scale(.98);}
+.fab .fab-arrow{font-size:18px;line-height:1;transition:.22s;}
+.fab:hover .fab-arrow{transform:translateX(-3px);}
+
+body[data-view="learn"] .fab,
+body[data-view="quiz"] .fab,
+body[data-view="result"] .fab{
+  display:inline-flex;
+}
+
+/* ===== 顶部工具栏 ===== */
+.toolbar{
+  display:flex;align-items:center;justify-content:flex-end;
+  gap:10px;margin-bottom:18px;flex-wrap:wrap;
+}
+.tool-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:9px 16px;border-radius:13px;border:2px solid #86efac;
+  background:#fff;color:#15803d;font-family:inherit;
+  font-size:13.5px;font-weight:800;cursor:pointer;
+  transition:.2s;letter-spacing:.3px;
+}
+.tool-btn:hover{
+  background:#f0fdf4;transform:translateY(-2px);
+  border-color:#22c55e;box-shadow:0 6px 16px rgba(34,197,94,.22);
+}
+
+.hero{text-align:center;margin-bottom:26px;}
+.hero .icon{
+  width:86px;height:86px;margin:0 auto 16px;border-radius:28px;
+  background:linear-gradient(135deg,#4ade80,#22c55e,#15803d);
+  display:flex;align-items:center;justify-content:center;font-size:44px;
+  box-shadow:0 16px 40px rgba(34,197,94,.5);
+  animation:float 3.6s ease-in-out infinite;
+}
+@keyframes float{0%,100%{transform:translateY(0) rotate(-2deg);}50%{transform:translateY(-10px) rotate(2deg);}}
+.hero h1{font-size:27px;font-weight:900;letter-spacing:.5px;margin-bottom:4px;}
+.hero .sub{font-size:14px;color:#16a34a;font-weight:800;margin-bottom:10px;letter-spacing:.5px;}
+.hero p{font-size:13.5px;color:#64748b;line-height:1.75;}
+
+.statrow{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px;}
+.statbox{background:#fff;border-radius:18px;padding:16px 8px;text-align:center;border:1.5px solid #dcfce7;box-shadow:0 6px 20px rgba(34,197,94,.1);}
+.statbox b{font-size:24px;font-weight:900;color:#16a34a;display:block;line-height:1.15;}
+.statbox small{font-size:11px;color:#94a3b8;letter-spacing:.5px;}
+
+.homecards{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:560px){.homecards{grid-template-columns:1fr;}}
+
+.homecard{
+  background:#fff;border:2px solid #dcfce7;border-radius:24px;
+  padding:26px 20px;text-align:center;cursor:pointer;
+  transition:.22s cubic-bezier(.4,0,.2,1);font-family:inherit;
+  box-shadow:0 10px 30px rgba(34,197,94,.1);
+  position:relative;overflow:hidden;
+}
+.homecard.primary{
+  background:linear-gradient(135deg,#4ade80,#22c55e,#15803d);
+  border-color:transparent;color:#fff;
+  box-shadow:0 14px 36px rgba(34,197,94,.44);
+}
+.homecard.primary .hctitle{color:#fff;}
+.homecard.primary .hcjp{color:rgba(255,255,255,.78);}
+.homecard.primary .hcsub{color:rgba(255,255,255,.9);}
+.homecard:hover{
+  transform:translateY(-5px);border-color:#86efac;
+  box-shadow:0 18px 40px rgba(34,197,94,.26);
+}
+.homecard.primary:hover{box-shadow:0 20px 44px rgba(34,197,94,.55);}
+.hcicon{font-size:44px;margin-bottom:12px;display:block;transition:.24s;position:relative;}
+.homecard:hover .hcicon{transform:scale(1.12) rotate(-4deg);}
+.hctitle{font-size:18px;font-weight:900;color:#334155;margin-bottom:4px;position:relative;}
+.hcjp{font-size:12px;font-weight:800;color:#94a3b8;margin-bottom:6px;position:relative;letter-spacing:.5px;}
+.hcsub{font-size:12.5px;color:#94a3b8;font-weight:600;line-height:1.6;position:relative;}
+
+.homenote{
+  margin-top:18px;text-align:center;font-size:12.5px;color:#16a34a;
+  background:#f0fdf4;border:1.5px solid #86efac;border-radius:14px;
+  padding:12px 16px;font-weight:700;line-height:1.7;
+}
+
+.learnhead{display:flex;align-items:center;gap:13px;margin-bottom:22px;}
+.learnhead .licon{
+  width:52px;height:52px;border-radius:17px;flex:none;
+  background:linear-gradient(135deg,#4ade80,#15803d);
+  display:flex;align-items:center;justify-content:center;font-size:26px;
+  box-shadow:0 10px 26px rgba(34,197,94,.4);
+}
+.learnhead h2{font-size:20px;font-weight:900;}
+.learnhead p{font-size:12.5px;color:#94a3b8;font-weight:600;margin-top:3px;}
+
+.legend{
+  display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px;
+  background:#fff;border:1.5px solid #dcfce7;border-radius:14px;
+  padding:12px 16px;font-size:12.5px;color:#475569;font-weight:600;
+}
+.legend .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle;}
+.legend .dot.hot{background:linear-gradient(135deg,#4ade80,#15803d);}
+.legend .dot.cold{background:#cbd5e1;}
+
+.kcard{
+  background:#fff;border-radius:22px;padding:24px 24px 20px;
+  margin-bottom:16px;border:1.5px solid #dcfce7;
+  box-shadow:0 8px 26px rgba(34,197,94,.1);
+  animation:pop .5s cubic-bezier(.34,1.56,.64,1) both;
+}
+.kcard:nth-child(2){animation-delay:.05s;}
+.kcard:nth-child(3){animation-delay:.1s;}
+.kcard:nth-child(4){animation-delay:.15s;}
+.kcard:nth-child(5){animation-delay:.2s;}
+.kcard:nth-child(6){animation-delay:.25s;}
+.kcard:nth-child(7){animation-delay:.3s;}
+
+.kcard-head{display:flex;align-items:center;gap:11px;margin-bottom:16px;}
+.kcard-emoji{
+  width:42px;height:42px;border-radius:13px;flex:none;
+  display:flex;align-items:center;justify-content:center;font-size:22px;
+}
+.kcard-emoji.c1{background:linear-gradient(135deg,#dcfce7,#bbf7d0);}
+.kcard-emoji.c2{background:linear-gradient(135deg,#ecfdf5,#d1fae5);}
+.kcard-emoji.c3{background:linear-gradient(135deg,#f0fdf4,#dcfce7);}
+.kcard-emoji.c4{background:linear-gradient(135deg,#fef3c7,#fde68a);}
+.kcard-emoji.c5{background:linear-gradient(135deg,#ede9fe,#ddd6fe);}
+.kcard-emoji.c6{background:linear-gradient(135deg,#fee2e2,#fecaca);}
+.kcard-emoji.c7{background:linear-gradient(135deg,#fce7f3,#fbcfe8);}
+.kcard-title{font-size:17px;font-weight:900;color:#1e293b;letter-spacing:.3px;}
+.kcard-title small{font-size:11.5px;color:#94a3b8;font-weight:700;margin-left:6px;}
+
+.kcard ul{list-style:none;padding:0;}
+.kcard li{
+  position:relative;padding:7px 0 7px 24px;font-size:14.5px;
+  line-height:1.8;color:#334155;font-weight:600;
+}
+.kcard li::before{
+  content:"";position:absolute;left:6px;top:15px;
+  width:8px;height:8px;border-radius:50%;
+  background:linear-gradient(135deg,#4ade80,#15803d);
+}
+.kcard li b{color:#15803d;font-weight:900;}
+.kcard li sub{font-size:.7em;vertical-align:-.28em;font-weight:800;}
+
+.kcard li.muted{color:#94a3b8;font-weight:500;}
+.kcard li.muted::before{background:#cbd5e1;}
+.kcard li.muted b{color:#94a3b8;font-weight:600;}
+
+.kformula{
+  background:linear-gradient(135deg,#f0fdf4,#dcfce7);
+  border-left:4px solid #22c55e;
+  padding:13px 18px;border-radius:12px;margin:10px 0 4px;
+  font-size:14.5px;font-weight:800;color:#166534;
+  font-family:"Helvetica Neue",Arial,sans-serif;letter-spacing:.3px;
+  text-align:center;line-height:1.9;
+}
+.kformula sub{font-size:.7em;vertical-align:-.28em;font-weight:800;}
+
+.ktable{width:100%;border-collapse:collapse;margin:8px 0 4px;font-size:13px;}
+.ktable th{
+  background:#f0fdf4;color:#166534;font-weight:800;
+  padding:8px 6px;text-align:center;border:1px solid #dcfce7;
+  font-size:12px;
+}
+.ktable td{
+  padding:7px 6px;text-align:center;border:1px solid #e8f9ee;
+  color:#334155;font-weight:600;
+}
+.ktable td b{color:#15803d;font-weight:900;}
+.ktable sub{font-size:.72em;vertical-align:-.28em;font-weight:800;}
+
+.startbtn{
+  width:100%;padding:18px;border:none;border-radius:18px;
+  font-size:17px;font-weight:900;font-family:inherit;letter-spacing:.6px;
+  cursor:pointer;transition:.2s;margin-top:10px;
+  background:linear-gradient(135deg,#4ade80,#15803d);color:#fff;
+  box-shadow:0 12px 30px rgba(34,197,94,.42);
+}
+.startbtn:hover{transform:translateY(-2px);box-shadow:0 16px 38px rgba(34,197,94,.55);}
+
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
+.qmeta{font-size:15px;font-weight:800;color:#334155;}
+.qmeta small{display:block;font-size:11.5px;color:#94a3b8;font-weight:600;margin-top:2px;}
+.scorechip{background:#fff;border-radius:15px;padding:8px 20px;text-align:center;box-shadow:0 6px 20px rgba(34,197,94,.16);}
+.scorechip b{font-size:20px;color:#16a34a;line-height:1.1;display:block;}
+.scorechip small{font-size:10px;color:#94a3b8;letter-spacing:1px;}
+
+.progresswrap{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+.progress{flex:1;height:10px;border-radius:99px;background:#fff;overflow:hidden;box-shadow:inset 0 1px 3px rgba(0,0,0,.06);}
+#bar{height:100%;width:0%;border-radius:99px;background:linear-gradient(90deg,#86efac,#22c55e,#15803d);transition:width .45s cubic-bezier(.4,0,.2,1);}
+#pct{font-size:12px;font-weight:800;color:#22c55e;min-width:42px;text-align:right;}
+
+.card{background:#fff;border-radius:28px;padding:30px 26px 26px;box-shadow:0 18px 55px rgba(34,197,94,.18);}
+
+.qtag{
+  display:inline-block;font-size:12px;font-weight:800;padding:5px 14px;
+  border-radius:99px;letter-spacing:.5px;margin-bottom:16px;
+  background:linear-gradient(135deg,#4ade80,#15803d);color:#fff;
+  box-shadow:0 4px 12px rgba(34,197,94,.35);
+}
+.qtag.fill{background:linear-gradient(135deg,#0ea5e9,#06b6d4);box-shadow:0 4px 12px rgba(14,165,233,.35);}
+
+.qtext{font-size:16.5px;line-height:1.95;font-weight:600;color:#1e293b;margin-bottom:4px;word-break:break-word;}
+.qtext sub{font-size:.7em;vertical-align:-.28em;font-weight:800;}
+
+.options{display:flex;flex-direction:column;gap:11px;margin-top:20px;}
+.opt{
+  display:flex;align-items:flex-start;gap:14px;width:100%;text-align:left;
+  padding:15px 18px;border-radius:17px;border:2px solid #edf0fa;
+  background:#fafbff;color:#1e293b;font-size:15.5px;line-height:1.7;
+  font-family:inherit;font-weight:600;cursor:pointer;
+  transition:.18s cubic-bezier(.4,0,.2,1);
+}
+.opt .num{
+  flex:none;width:28px;height:28px;border-radius:50%;
+  background:#f0fdf4;color:#16a34a;font-size:13px;font-weight:900;
+  display:flex;align-items:center;justify-content:center;transition:.18s;
+}
+.opt .txt{flex:1;padding-top:1px;}
+.opt .txt sub{font-size:.7em;vertical-align:-.28em;font-weight:800;}
+.opt:not(:disabled):hover{border-color:#86efac;background:#fff;transform:translateY(-2px);box-shadow:0 10px 26px rgba(34,197,94,.2);}
+.opt:not(:disabled):hover .num{background:#16a34a;color:#fff;}
+.opt:disabled{cursor:default;}
+.opt.correct{border-color:#22c55e;background:linear-gradient(135deg,#f0fdf4,#dcfce7);box-shadow:0 8px 22px rgba(34,197,94,.28);}
+.opt.correct .num{background:#22c55e;color:#fff;}
+.opt.wrong{border-color:#f87171;background:linear-gradient(135deg,#fef2f2,#fee2e2);animation:shake .42s;}
+.opt.wrong .num{background:#ef4444;color:#fff;}
+.opt.dim{opacity:.45;}
+@keyframes shake{0%,100%{transform:translateX(0);}20%{transform:translateX(-7px);}40%{transform:translateX(7px);}60%{transform:translateX(-5px);}80%{transform:translateX(5px);}}
+
+.slotwrap{display:flex;justify-content:center;margin:22px 0 8px;}
+.slot{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:170px;min-height:64px;padding:10px 24px;
+  border-radius:18px;border:2.5px dashed #86efac;
+  background:linear-gradient(135deg,#f0fdf4,#dcfce7);
+  font-size:22px;font-weight:900;color:#166534;letter-spacing:1.5px;
+  cursor:pointer;transition:.2s;
+}
+.slot sub{font-size:.68em;vertical-align:-.28em;font-weight:800;}
+.slot.empty{color:#86efac;font-size:14px;letter-spacing:0;font-weight:700;}
+.slot:hover{transform:translateY(-2px);border-color:#22c55e;box-shadow:0 8px 22px rgba(34,197,94,.25);}
+.slot.filled{background:linear-gradient(135deg,#ecfdf5,#bbf7d0);border-style:solid;border-color:#22c55e;}
+.slot.correct{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-color:#22c55e;color:#166534;border-style:solid;}
+.slot.wrong{background:linear-gradient(135deg,#fef2f2,#fee2e2);border-color:#f87171;color:#dc2626;border-style:solid;animation:shake .42s;}
+
+.bank{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:20px;}
+.chip{
+  padding:13px 22px;border-radius:16px;border:2px solid #e5e9f7;
+  background:#fff;color:#334155;font-family:inherit;font-size:17px;
+  font-weight:800;cursor:pointer;transition:.16s;letter-spacing:.5px;
+}
+.chip sub{font-size:.7em;vertical-align:-.28em;font-weight:800;}
+.chip:hover{background:#f0fdf4;border-color:#86efac;transform:translateY(-2px);box-shadow:0 8px 20px rgba(34,197,94,.18);}
+.chip:active{transform:scale(.95);}
+.chip.used{opacity:.28;pointer-events:none;}
+
+.confirmbtn{
+  width:100%;margin-top:14px;padding:15px;border:none;border-radius:16px;
+  background:linear-gradient(135deg,#f59e0b,#f97316);color:#fff;
+  font-size:15.5px;font-weight:900;font-family:inherit;cursor:pointer;
+  box-shadow:0 8px 22px rgba(249,115,22,.34);transition:.2s;
+}
+.confirmbtn:hover{transform:translateY(-2px);}
+.confirmbtn:disabled{background:#e2e8f0;color:#94a3b8;box-shadow:none;cursor:not-allowed;transform:none;}
+
+.feedback{margin-top:20px;padding:20px;border-radius:20px;animation:pop .36s cubic-bezier(.34,1.56,.64,1);}
+.feedback.ok{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac;}
+.feedback.no{background:linear-gradient(135deg,#fff7ed,#fef2f2);border:1.5px solid #fed7aa;}
+.fb-title{font-size:17px;font-weight:900;margin-bottom:10px;}
+.feedback.ok .fb-title{color:#15803d;}
+.feedback.no .fb-title{color:#ea580c;}
+.fb-body{font-size:14.5px;line-height:1.95;color:#334155;}
+.fb-body b{color:#15803d;}
+.fb-body sub{font-size:.7em;vertical-align:-.28em;font-weight:800;}
+
+.nextbtn{
+  margin-top:16px;width:100%;padding:16px;border:none;border-radius:17px;
+  background:linear-gradient(135deg,#4ade80,#15803d);color:#fff;
+  font-size:16px;font-weight:900;font-family:inherit;letter-spacing:.5px;
+  cursor:pointer;transition:.2s;box-shadow:0 8px 24px rgba(34,197,94,.4);
+}
+.nextbtn:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(34,197,94,.5);}
+
+.result{text-align:center;padding:14px 4px;}
+.result .emoji{font-size:74px;line-height:1;margin-bottom:10px;animation:bounce .95s;}
+@keyframes bounce{0%{transform:scale(.25) rotate(-20deg);opacity:0;}60%{transform:scale(1.18) rotate(6deg);}100%{transform:scale(1) rotate(0);opacity:1;}}
+.result h2{font-size:26px;font-weight:900;margin-bottom:6px;}
+.title-badge{
+  display:inline-block;margin:12px 0 18px;padding:10px 28px;border-radius:99px;
+  font-size:17px;font-weight:900;letter-spacing:1px;
+  background:linear-gradient(135deg,#86efac,#22c55e,#15803d);
+  color:#fff;box-shadow:0 10px 28px rgba(34,197,94,.5);
+  animation:glow 1.8s ease-in-out infinite;
+}
+@keyframes glow{0%,100%{box-shadow:0 10px 28px rgba(34,197,94,.5);}50%{box-shadow:0 14px 40px rgba(22,163,74,.68);}}
+.result .sub{color:#64748b;font-size:14px;margin-bottom:20px;line-height:1.8;}
+.ring{position:relative;width:180px;height:180px;margin:0 auto 18px;}
+.ring svg{transform:rotate(-90deg);}
+.ring .inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.bignum{
+  font-size:56px;font-weight:900;line-height:1.05;
+  background:linear-gradient(135deg,#4ade80,#15803d);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.bignum small{font-size:22px;color:#94a3b8;-webkit-text-fill-color:#94a3b8;}
+
+.review{margin-top:24px;text-align:left;background:#f8fbff;border-radius:20px;padding:20px;}
+.review h3{font-size:14px;color:#64748b;margin-bottom:14px;letter-spacing:.5px;font-weight:900;}
+.review .item{
+  display:flex;gap:11px;font-size:14px;padding:11px 0;
+  border-bottom:1px dashed #e2e8f0;line-height:1.7;align-items:flex-start;
+}
+.review .item:last-child{border-bottom:none;}
+.review .tag{flex:none;background:#f0fdf4;color:#15803d;font-weight:900;font-size:12px;padding:3px 10px;border-radius:8px;}
+.review .ans{color:#15803d;font-weight:900;}
+
+.resultbtns{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px;justify-content:center;}
+.again{
+  padding:16px 36px;border:none;border-radius:17px;
+  background:linear-gradient(135deg,#4ade80,#15803d);color:#fff;
+  font-size:16px;font-weight:900;font-family:inherit;cursor:pointer;
+  box-shadow:0 10px 28px rgba(34,197,94,.4);transition:.2s;
+}
+.again:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(34,197,94,.5);}
+.homebtn{
+  padding:16px 36px;border:2px solid #dcfce7;border-radius:17px;
+  background:#fff;color:#15803d;font-size:16px;font-weight:900;
+  font-family:inherit;cursor:pointer;transition:.2s;
+}
+.homebtn:hover{background:#f0fdf4;transform:translateY(-2px);}
+
+@media (max-width:640px){
+  body{padding:14px 10px 110px;}
+  .card{padding:24px 16px 22px;border-radius:22px;}
+  .hero h1{font-size:23px;}
+  .opt{font-size:14.5px;padding:13px 14px;}
+  .slot{min-width:140px;font-size:19px;}
+  .kcard{padding:20px 18px 16px;}
+  .ktable{font-size:11.5px;}
+  .ktable th,.ktable td{padding:6px 3px;}
+  .tool-btn{padding:8px 12px;font-size:12.5px;}
+  .fab{
+    left:12px;bottom:14px;
+    padding:12px 18px;font-size:13.5px;
+  }
+  .fab .fab-arrow{font-size:16px;}
+}
+</style>
+</head>
+<body data-view="home">
+<canvas id="confetti"></canvas>
+
+<!-- ===== 悬浮返回按钮 ===== -->
+<button class="fab" id="fabHome">
+  <span class="fab-arrow">←</span>
+  <span>返回特训主页</span>
+</button>
+
+<div class="wrap">
+
+  <!-- ========== 首页（本模块主页） ========== -->
+  <section id="v-home" class="view active">
+    <div class="toolbar">
+      <button class="tool-btn" onclick="location.href='index.html'">
+        🏠 返回大主页
+      </button>
+    </div>
+
+    <div class="hero">
+      <div class="icon">🧪</div>
+      <h1>卤素 特训道场</h1>
+      <div class="sub">ハロゲン 特訓道場</div>
+      <p>17族元素（F・Cl・Br・I）的重点<br>用 10 道题来检查掌握程度！</p>
+    </div>
+
+    <div class="statrow">
+      <div class="statbox"><b id="dbCount">0</b><small>收录题目</small></div>
+      <div class="statbox"><b>10</b><small>每轮出题</small></div>
+      <div class="statbox"><b>7</b><small>合格线</small></div>
+    </div>
+
+    <div class="homecards">
+      <button class="homecard" id="learnCard">
+        <span class="hcicon">📖</span>
+        <div class="hctitle">知识要点</div>
+        <div class="hcjp">知識ポイント</div>
+        <div class="hcsub">ハロゲンの要点を確認</div>
+      </button>
+      <button class="homecard primary" id="startCard">
+        <span class="hcicon">✏️</span>
+        <div class="hctitle">开始特训</div>
+        <div class="hcjp">特訓スタート</div>
+        <div class="hcsub">10 問でチェック！</div>
+      </button>
+    </div>
+
+    <div class="homenote">
+      💡 知识要点随时可以查看，答题前后都不影响
+    </div>
+  </section>
+
+  <!-- ========== 知识点页 ========== -->
+  <section id="v-learn" class="view">
+    <div class="toolbar">
+      <button class="tool-btn" onclick="location.href='index.html'">🏠 大主页</button>
+    </div>
+
+    <div class="learnhead">
+      <div class="licon">📖</div>
+      <div>
+        <h2>知识要点 · 知識ポイント</h2>
+        <p>ハロゲン（17族）のまとめ</p>
+      </div>
+    </div>
+
+    <div class="legend">
+      <span><span class="dot hot"></span>彩色 = 考试重点，会出题</span>
+      <span><span class="dot cold"></span>灰色 = 了解即可，不出题</span>
+    </div>
+
+    <!-- A. 卤素总论 -->
+    <div class="kcard">
+      <div class="kcard-head">
+        <div class="kcard-emoji c1">🔬</div>
+        <div class="kcard-title">ハロゲン総論 <small>卤素总论</small></div>
+      </div>
+      <ul>
+        <li>17族の元素を<b>ハロゲン</b>という。</li>
+        <li>ハロゲンの原子は<b>価電子を7個</b>もち、<b>1価の陰イオン</b>になりやすい。</li>
+        <li>陰イオンになりやすい傾向は周期表で<b>上にある元素ほど強い</b>。</li>
+        <li><b>フッ素は全元素の中で最も陰性が強い</b>。</li>
+      </ul>
+    </div>
+
+    <!-- B. 卤素单质的性质 -->
+    <div class="kcard">
+      <div class="kcard-head">
+        <div class="kcard-emoji c2">💠</div>
+        <div class="kcard-title">ハロゲン単体の性質</div>
+      </div>
+      <ul>
+        <li>単体は<b>二原子分子</b>からなり、<b>有色・有毒</b>で、<b>酸化作用が強い</b>。</li>
+        <li>酸化力の強さは <b>F<sub>2</sub> &gt; Cl<sub>2</sub> &gt; Br<sub>2</sub> &gt; I<sub>2</sub></b> の順。<b>原子番号が小さいほど酸化力が強い</b>。</li>
+      </ul>
+      <table class="ktable">
+        <tr>
+          <th>単体</th><th>常温での状態</th>
+        </tr>
+        <tr><td>F<sub>2</sub></td><td><b>淡黄色・気体</b></td></tr>
+        <tr><td>Cl<sub>2</sub></td><td><b>黄緑色・気体</b></td></tr>
+        <tr><td>Br<sub>2</sub></td><td><b>赤褐色・液体</b></td></tr>
+        <tr><td>I<sub>2</sub></td><td><b>黒紫色・固体（昇華性あり）</b></td></tr>
+      </table>
+
+      <div class="kcard-title" style="margin-top:18px;font-size:14px;">水素との反応</div>
+      <ul>
+        <li>F<sub>2</sub>：<b>冷暗所でも爆発的に反応</b></li>
+        <li>Cl<sub>2</sub>：<b>常温でも光により爆発的に反応</b></li>
+        <li>Br<sub>2</sub>：触媒の存在下で加熱により反応</li>
+        <li>I<sub>2</sub>：触媒の存在下で加熱により反応（<b>可逆で不徹底</b>）</li>
+      </ul>
+
+      <div class="kcard-title" style="margin-top:18px;font-size:14px;">水との反応</div>
+      <ul>
+        <li>F<sub>2</sub>：<b>最も激しく反応し、O<sub>2</sub> が発生</b></li>
+        <li>Cl<sub>2</sub>：<b>水に少し溶け、一部が反応して HCl と HClO を生じる</b></li>
+        <li>Br<sub>2</sub>：Cl<sub>2</sub> より反応性は弱いが、同様に反応</li>
+        <li>I<sub>2</sub>：水に溶けにくく、反応しにくい（<b>エタノール・ヘキサンなど有機溶媒には溶けやすい</b>）</li>
+      </ul>
+      <div class="kformula">
+        2F<sub>2</sub> + 2H<sub>2</sub>O → 4HF + O<sub>2</sub><br>
+        Cl<sub>2</sub> + H<sub>2</sub>O ⇌ HCl + HClO
+      </div>
+    </div>
+
+    <!-- C. 卤素单质的制法 -->
+    <div class="kcard">
+      <div class="kcard-head">
+        <div class="kcard-emoji c3">⚗️</div>
+        <div class="kcard-title">ハロゲン単体の製法 <small>制法</small></div>
+      </div>
+      <ul>
+        <li><b>実験室で Cl<sub>2</sub></b>：MnO<sub>2</sub> に濃塩酸を加えて加熱</li>
+        <li><b>実験室で Cl<sub>2</sub>（別法）</b>：<b>さらし粉（漂白粉）CaCl(ClO)·H<sub>2</sub>O に濃塩酸を加える</b></li>
+        <li>捕集は<b>下方置換</b>で行う。</li>
+        <li>除雑：まず<b>水</b>に通して HCl を除き、次に<b>濃硫酸</b>に通して水蒸気を除き、乾燥 Cl<sub>2</sub> を下方置換で得る。</li>
+        <li><b>工業的製法</b>：<b>塩化ナトリウム NaCl 水溶液の電気分解</b>でつくる。</li>
+      </ul>
+      <div class="kformula">
+        MnO<sub>2</sub> + 4HCl →(加熱) MnCl<sub>2</sub> + 2H<sub>2</sub>O + Cl<sub>2</sub><br>
+        CaCl(ClO)·H<sub>2</sub>O + 2HCl → CaCl<sub>2</sub> + Cl<sub>2</sub> + 2H<sub>2</sub>O<br>
+        2NaCl + 2H<sub>2</sub>O → 2NaOH + H<sub>2</sub> + Cl<sub>2</sub>
+      </div>
+    </div>
+
+    <!-- D. 卤素单质的反应 -->
+    <div class="kcard">
+      <div class="kcard-head">
+        <div class="kcard-emoji c4">⚡</div>
+        <div class="kcard-title">ハロゲン単体の反応 <small>氧化作用</small></div>
+      </div>
+      <ul>
+        <li>Cl<sub>2</sub> は H<sub>2</sub> や Cu と反応して HCl や CuCl<sub>2</sub> を生じる。</li>
+        <li>ハロゲン単体には<b>酸化作用</b>がある。</li>
+        <li>フッ素はハロゲン単体中で<b>最も強い酸化力</b>をもつ。</li>
+        <li>ヨウ化物イオンを含む水溶液に<b>塩素水</b>を加えると<b>ヨウ素 I<sub>2</sub> が遊離</b>する。</li>
+        <li>ヨウ素デンプン反応：I<sub>2</sub> はデンプンに加えると<b>青色</b>を呈する。</li>
+        <li><b>塩素は塩基と反応して塩をつくる</b>（NaCl + NaClO）。</li>
+        <li><b>次亜塩素酸 HClO</b>：<b>弱酸</b>だが<b>酸化力が強く</b>、漂白剤や殺菌剤に用いられる。</li>
+        <li><b>塩素酸 HClO<sub>3</sub></b>：強酸。塩類は酸素の製法に使われる。</li>
+        <li><b>過塩素酸 HClO<sub>4</sub></b>：強酸だが酸化力は弱い。</li>
+      </ul>
+      <div class="kformula">
+        H<sub>2</sub> + Cl<sub>2</sub> →(光) 2HCl<br>
+        2I<sup>−</sup> + Cl<sub>2</sub> → I<sub>2</sub> + 2Cl<sup>−</sup><br>
+        2KCl + F<sub>2</sub> → 2KF + Cl<sub>2</sub><br>
+        2NaOH + Cl<sub>2</sub> → NaCl + NaClO + H<sub>2</sub>O
+      </div>
+    </div>
+
+    <!-- E. 卤化氢 -->
+    <div class="kcard">
+      <div class="kcard-head">
+        <div class="kcard-emoji c5">💨</div>
+        <div class="kcard-title">ハロゲン化水素 <small>卤化氢</small></div>
+      </div>
+      <ul>
+        <li>常温常圧では<b>無色の気体</b>で、<b>有毒</b>、<b>強い刺激臭</b>をもつ。</li>
+        <li><b>水によく溶け</b>、<b>フッ化水素 HF 以外</b>の水溶液は<b>強い酸性</b>を示す。</li>
+      </ul>
+
+      <div class="kcard-title" style="margin-top:18px;font-size:14px;">塩化水素 HCl</div>
+      <ul>
+        <li><b>工業的製法</b>：<b>塩素 Cl<sub>2</sub> と水素 H<sub>2</sub> を直接反応</b>させる。</li>
+        <li><b>実験室的製法</b>：NaCl に濃硫酸を加えて穏やかに加熱。<b>下方置換</b>で集める。</li>
+        <li>HCl 水溶液を<b>塩酸</b>という。</li>
+        <li><b>アンモニアと反応して白煙（NH<sub>4</sub>Cl）を生じる</b>。</li>
+        <li>塩酸にマグネシウム Mg 片を入れると、<b>水素 H<sub>2</sub> を発生</b>して溶ける。</li>
+      </ul>
+      <div class="kformula">
+        NaCl + H<sub>2</sub>SO<sub>4</sub> →(加熱) NaHSO<sub>4</sub> + HCl<br>
+        HCl + NH<sub>3</sub> → NH<sub>4</sub>Cl（白煙）<br>
+        Mg + 2HCl → MgCl<sub>2</sub> + H<sub>2</sub>
+      </div>
+
+      <div class="kcard-title" style="margin-top:18px;font-size:14px;">フッ化水素 HF</div>
+      <ul>
+        <li><b>製法</b>：CaF<sub>2</sub>（蛍石の主成分）に濃硫酸を加えて加熱する。</li>
+        <li>HF 水溶液は<b>フッ化水素酸</b>とよばれる<b>弱酸</b>である。</li>
+        <li>フッ化水素酸は<b>ガラスなどのケイ酸塩や石英 SiO<sub>2</sub> を溶かす</b>ので、<b>ポリエチレン容器</b>で保存する。</li>
+        <li>HF は F の電気陰性度が大きく、分子間で<b>強い水素結合</b>をつくるため、<b>沸点が高くなる</b>（20℃）。</li>
+        <li>H-F の結合距離は短く、H と F は強く結びついているため、<b>HF は弱酸</b>である。</li>
+      </ul>
+      <div class="kformula">
+        CaF<sub>2</sub> + H<sub>2</sub>SO<sub>4</sub> → CaSO<sub>4</sub> + 2HF<br>
+        SiO<sub>2</sub> + 6HF → H<sub>2</sub>SiF<sub>6</sub> + 2H<sub>2</sub>O
+      </div>
+    </div>
+
+    <!-- F. 卤化氢性质对比 -->
+    <div class="kcard">
+      <div class="kcard-head">
+        <div class="kcard-emoji c6">📊</div>
+        <div class="kcard-title">ハロゲン化水素の性質まとめ</div>
+      </div>
+      <table class="ktable">
+        <tr>
+          <th>ハロゲン化水素</th><th>沸点(℃)</th><th>水溶液の名称</th><th>酸の強さ</th>
+        </tr>
+        <tr><td>フッ化水素 HF</td><td><b>20</b></td><td>フッ化水素酸</td><td><b>弱酸</b></td></tr>
+        <tr><td>塩化水素 HCl</td><td><b>−85</b></td><td>塩酸</td><td><b>強酸</b></td></tr>
+        <tr><td>臭化水素 HBr</td><td><b>−67</b></td><td>臭化水素酸</td><td><b>強酸</b></td></tr>
+        <tr><td>ヨウ化水素 HI</td><td><b>−35</b></td><td>ヨウ化水素酸</td><td><b>強酸</b></td></tr>
+      </table>
+    </div>
+
+    <!-- G. 卤化银 -->
+    <div class="kcard">
+      <div class="kcard-head">
+        <div class="kcard-emoji c7">🪙</div>
+        <div class="kcard-title">ハロゲン化銀 <small>卤化银</small></div>
+      </div>
+      <ul>
+        <li><b>AgF 以外</b>のハロゲン化銀は<b>水に溶けない</b>。</li>
+        <li>ハロゲン化物イオンを含む水溶液に <b>AgNO<sub>3</sub> 水溶液</b>を加えると沈殿が生じる。</li>
+      </ul>
+      <table class="ktable">
+        <tr>
+          <th>ハロゲン化銀</th><th>沈殿の色</th>
+        </tr>
+        <tr><td>塩化銀 AgCl</td><td><b>白色</b></td></tr>
+        <tr><td>臭化銀 AgBr</td><td><b>淡黄色</b></td></tr>
+        <tr><td>ヨウ化銀 AgI</td><td><b>黄色</b></td></tr>
+      </table>
+      <ul style="margin-top:10px;">
+        <li><b>フッ化銀 AgF は水に可溶</b>である。</li>
+      </ul>
+    </div>
+
+    <button class="startbtn" id="startBtn">▶ 开始特训 · 特訓を始める</button>
+  </section>
+
+  <!-- ========== 答题页 ========== -->
+  <section id="v-quiz" class="view">
+    <div class="topbar">
+      <div class="qmeta" id="qMeta">第 1 题<small>共 10 题</small></div>
+      <div class="scorechip"><b id="scoreNum">0</b><small>SCORE</small></div>
+    </div>
+
+    <div class="progresswrap">
+      <div class="progress"><div id="bar"></div></div>
+      <span id="pct">0%</span>
+    </div>
+
+    <div class="card" id="questionArea"></div>
+  </section>
+
+  <!-- ========== 结果页 ========== -->
+  <section id="v-result" class="view">
+    <div class="card" id="resultCard"></div>
+  </section>
+
+</div>
+
+<script>
+/* =====================================================================
+   工具
+   ===================================================================== */
+const $ = id => document.getElementById(id);
+const CIRC = '①②③④⑤⑥';
+
+const fmt = s => {
+  let str = String(s == null ? '' : s);
+  str = str.replace(/~(\d+)~/g, '\x00SUP\x00$1\x00SUPEND\x00');
+  str = str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  str = str.replace(/\n/g,'<br>');
+  str = str.replace(/\x00SUP\x00(\d+)\x00SUPEND\x00/g, '<sub>$1</sub>');
+  return str;
+};
+
+function shuffle(a){
+  a = a.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+/* =====================================================================
+   题库
+   ===================================================================== */
+const BANK = [
+{t:'single',q:'17族の元素を何というか。',
+ o:['ハロゲン','アルカリ金属','貴ガス','アルカリ土類金属'],a:0,
+ e:'17族の元素をハロゲンという。'},
+{t:'single',q:'ハロゲンの原子の価電子の数と、なりやすいイオンとして正しいものはどれか。',
+ o:['価電子7個、1価の陰イオン','価電子1個、1価の陽イオン','価電子7個、1価の陽イオン','価電子0個、イオンにならない'],a:0,
+ e:'ハロゲンの原子は価電子を7個もち、1価の陰イオンになりやすい。'},
+{t:'single',q:'陰イオンになりやすい傾向について正しいものはどれか。',
+ o:['周期表で上にある元素ほど強い','周期表で下にある元素ほど強い','周期表で右にある元素ほど弱い','すべてのハロゲンで同じ'],a:0,
+ e:'陰イオンになりやすい傾向は周期表で上にある元素ほど強い。'},
+{t:'single',q:'全元素の中で最も陰性（電気陰性度）が強い元素はどれか。',
+ o:['フッ素','塩素','酸素','ヘリウム'],a:0,
+ e:'フッ素は全元素の中で最も陰性が強い。'},
+
+{t:'single',q:'ハロゲン単体の分子の形と性質として正しいものはどれか。',
+ o:['二原子分子で、有色・有毒','単原子分子で、無色・無臭','二原子分子で、無色・無毒','三原子分子で、有色・有毒'],a:0,
+ e:'ハロゲン単体は二原子分子からなり、有色・有毒である。'},
+{t:'single',q:'常温常圧でのハロゲン単体の状態の組み合わせとして正しいものはどれか。',
+ o:['F~2~：淡黄色気体、Cl~2~：黄緑色気体、Br~2~：赤褐色液体、I~2~：黒紫色固体',
+    'F~2~：黄緑色気体、Cl~2~：淡黄色気体、Br~2~：黒紫色固体、I~2~：赤褐色液体',
+    'F~2~：赤褐色液体、Cl~2~：黄緑色気体、Br~2~：淡黄色気体、I~2~：黒紫色固体',
+    'すべて無色の気体'],a:0,
+ e:'F₂ 淡黄色気体、Cl₂ 黄緑色気体、Br₂ 赤褐色液体、I₂ 黒紫色固体。'},
+{t:'single',q:'ハロゲン単体の酸化力の強さの順序として正しいものはどれか。',
+ o:['F~2~ > Cl~2~ > Br~2~ > I~2~','I~2~ > Br~2~ > Cl~2~ > F~2~','Cl~2~ > F~2~ > Br~2~ > I~2~','Br~2~ > I~2~ > F~2~ > Cl~2~'],a:0,
+ e:'酸化力の強さは F₂ > Cl₂ > Br₂ > I₂。原子番号が小さいほど酸化力が強い。'},
+{t:'single',q:'原子番号と酸化力の関係として正しいものはどれか。',
+ o:['原子番号が小さいほど酸化力が強い','原子番号が大きいほど酸化力が強い','酸化力はすべて同じ','酸化力と原子番号は無関係'],a:0,
+ e:'原子番号が小さいものほど酸化力が強い。'},
+{t:'single',q:'ヨウ素 I~2~ の性質として正しいものはどれか。',
+ o:['黒紫色の固体で、昇華性を示す','淡黄色の気体','黄緑色の気体','赤褐色の液体'],a:0,
+ e:'I₂ は黒紫色の固体で、昇華性を示す。'},
+{t:'single',q:'ヨウ素 I~2~ の溶解性として正しいものはどれか。',
+ o:['水に溶けにくく、エタノールやヘキサンなどの有機溶媒に溶けやすい','水によく溶ける','水にも有機溶媒にも溶けない','水に溶けて酸性を示す'],a:0,
+ e:'I₂ は水に溶けにくく、エタノール・ヘキサンなどの有機溶媒に溶けやすい。'},
+{t:'single',q:'水素とハロゲン単体の反応について正しいものはどれか。',
+ o:['F~2~ は冷暗所でも爆発的に反応する','Cl~2~ は冷暗所でも爆発的に反応する','Br~2~ は光だけで爆発的に反応する','I~2~ は常温で爆発的に反応する'],a:0,
+ e:'F₂ は冷暗所でも爆発的に反応。Cl₂ は常温でも光により爆発的に反応。'},
+{t:'single',q:'塩素と水素の反応について正しいものはどれか。',
+ o:['常温でも光により爆発的に反応する','冷暗所でも爆発的に反応する','触媒の存在下で加熱しないと反応しない','まったく反応しない'],a:0,
+ e:'Cl₂ は常温でも光により爆発的に反応して HCl を生じる。'},
+{t:'single',q:'水との反応で、最も激しく反応して O~2~ を発生するハロゲン単体はどれか。',
+ o:['フッ素 F~2~','塩素 Cl~2~','臭素 Br~2~','ヨウ素 I~2~'],a:0,
+ e:'2F₂ + 2H₂O → 4HF + O₂。フッ素が最も激しく反応し O₂ を発生。'},
+{t:'single',q:'塩素と水の反応で生じる物質の組み合わせとして正しいものはどれか。',
+ o:['HCl と HClO','HF と O~2~','HBr と HBrO','HI と HIO'],a:0,
+ e:'Cl₂ + H₂O ⇌ HCl + HClO。水に少し溶け、一部が反応する。'},
+
+{t:'single',q:'塩素の実験室的製法として正しいものはどれか。',
+ o:['二酸化マンガン MnO~2~ に濃塩酸を加えて加熱する','銅に濃硝酸を加える','石灰石に塩酸を加える','塩化ナトリウム水溶液を電気分解する'],a:0,
+ e:'MnO₂ + 4HCl →(加熱) MnCl₂ + 2H₂O + Cl₂。'},
+{t:'single',q:'さらし粉（漂白粉）CaCl(ClO)·H~2~O に濃塩酸を加えると発生する気体はどれか。',
+ o:['塩素 Cl~2~','酸素 O~2~','水素 H~2~','二酸化炭素 CO~2~'],a:0,
+ e:'CaCl(ClO)·H₂O + 2HCl → CaCl₂ + Cl₂ + 2H₂O。塩素が発生する。'},
+{t:'single',q:'さらし粉に濃塩酸を加えたときの化学反応式として正しいものはどれか。',
+ o:['CaCl(ClO)·H~2~O + 2HCl → CaCl~2~ + Cl~2~ + 2H~2~O',
+    'CaCl(ClO)·H~2~O + HCl → CaCl~2~ + Cl~2~ + H~2~O',
+    'CaCl(ClO)·H~2~O + 2HCl → CaCl~2~ + O~2~ + 2H~2~O',
+    'CaCl(ClO)·H~2~O + 2HCl → CaCl~2~ + H~2~ + 2H~2~O'],a:0,
+ e:'CaCl(ClO)·H₂O + 2HCl → CaCl₂ + Cl₂ + 2H₂O。これは実験室で塩素を発生させる代表的な方法。'},
+{t:'single',q:'塩素の工業的製法として正しいものはどれか。',
+ o:['塩化ナトリウム NaCl 水溶液の電気分解','二酸化マンガンに濃塩酸を加える','食塩に濃硫酸を加える','海水を蒸発させる'],a:0,
+ e:'工業的には NaCl 水溶液の電気分解で Cl₂ をつくる。'},
+{t:'single',q:'塩素の捕集法として最も適切なものはどれか。',
+ o:['下方置換','上方置換','水上置換','冷却捕集'],a:0,
+ e:'塩素は水に少し溶け、空気より重いので下方置換で捕集する。'},
+{t:'single',q:'発生した塩素に混じった HCl と水蒸気を除く手順として正しいものはどれか。',
+ o:['水に通して HCl を除き、次に濃硫酸に通して水蒸気を除く','濃硫酸に通して HCl を除き、次に水に通す','両方同時に水に通す','そのまま捕集する'],a:0,
+ e:'まず水に通して HCl を除き、次に濃硫酸に通して水蒸気を除き、乾燥 Cl₂ を下方置換で得る。'},
+
+{t:'single',q:'塩素と水素が光により反応したときの生成物はどれか。',
+ o:['HCl','HClO','H~2~O','Cl~2~O'],a:0,
+ e:'H₂ + Cl₂ →(光) 2HCl。'},
+{t:'single',q:'ハロゲン単体がもつ一般的な作用はどれか。',
+ o:['酸化作用','還元作用','中和作用','触媒作用'],a:0,
+ e:'ハロゲン単体には酸化作用がある。'},
+{t:'single',q:'フッ素がハロゲン単体中で最も強い酸化力をもつことを示す反応として正しいものはどれか。',
+ o:['2KCl + F~2~ → 2KF + Cl~2~','Cl~2~ + H~2~O → HCl + HClO','2NaOH + Cl~2~ → NaCl + NaClO + H~2~O','H~2~ + Cl~2~ → 2HCl'],a:0,
+ e:'2KCl + F₂ → 2KF + Cl₂。フッ素は塩素を塩化物イオンから遊離させる、最も強い酸化力をもつ。'},
+{t:'single',q:'ヨウ化物イオンを含む水溶液に塩素水を加えると何が起こるか。',
+ o:['ヨウ素 I~2~ が遊離する','塩素が発生する','白色沈殿が生じる','何も起こらない'],a:0,
+ e:'2I⁻ + Cl₂ → I₂ + 2Cl⁻。ヨウ素 I₂ が遊離する。'},
+{t:'single',q:'ヨウ素デンプン反応で、ヨウ素 I~2~ をデンプンに加えると何色になるか。',
+ o:['青色','赤色','黄色','無色'],a:0,
+ e:'I₂ はデンプンに加えると青色を呈する。'},
+{t:'single',q:'塩素と水酸化ナトリウム水溶液の反応の生成物として正しいものはどれか。',
+ o:['NaCl と NaClO と H~2~O','NaCl と H~2~O のみ','NaClO~3~ と H~2~','NaCl と O~2~'],a:0,
+ e:'2NaOH + Cl₂ → NaCl + NaClO + H₂O。次亜塩素酸ナトリウムが生成する。'},
+{t:'single',q:'次亜塩素酸 HClO について正しい記述はどれか。',
+ o:['弱酸だが酸化力が強く、漂白剤や殺菌剤に用いられる','強酸で酸化力が弱い','弱塩基である','還元剤として用いられる'],a:0,
+ e:'HClO は弱酸だが酸化力が強く、漂白剤や殺菌剤に用いられる。'},
+{t:'single',q:'塩素酸 HClO~3~ について正しい記述はどれか。',
+ o:['強酸で、塩類は酸素の製法に使われる','弱酸で酸化力が強い','強塩基である','還元剤として用いられる'],a:0,
+ e:'HClO₃ は強酸で、塩類（KClO₃ など）は酸素の製法に使われる。'},
+{t:'single',q:'過塩素酸 HClO~4~ について正しい記述はどれか。',
+ o:['強酸だが酸化力は弱い','弱酸だが酸化力が強い','強塩基である','還元剤として用いられる'],a:0,
+ e:'HClO₄ は強酸だが酸化力は弱い。'},
+
+{t:'single',q:'ハロゲン化水素の常温常圧での性質として正しいものはどれか。',
+ o:['無色の気体で、有毒、強い刺激臭','有色の気体で、無毒、無臭','無色の液体で、無毒','有色の固体で、有毒'],a:0,
+ e:'ハロゲン化水素は常温常圧で無色の気体、有毒、強い刺激臭をもつ。'},
+{t:'single',q:'ハロゲン化水素の水への溶解性と酸性について正しいものはどれか。',
+ o:['水によく溶け、HF 以外の水溶液は強い酸性','水に溶けにくく、すべて弱酸性','水によく溶け、すべて強酸性','水に溶けず、酸性を示さない'],a:0,
+ e:'水によく溶け、フッ化水素 HF 以外の水溶液は強い酸性を示す。'},
+{t:'single',q:'塩化水素 HCl の工業的製法として正しいものはどれか。',
+ o:['塩素 Cl~2~ と水素 H~2~ を直接反応させる','NaCl に濃硫酸を加える','CaF~2~ に濃硫酸を加える','食塩水を電気分解する'],a:0,
+ e:'工業的には塩素 Cl₂ と水素 H₂ を直接反応させて HCl をつくる。'},
+{t:'single',q:'塩化水素 HCl の実験室的製法として正しいものはどれか。',
+ o:['NaCl に濃硫酸を加えて穏やかに加熱し、下方置換で集める','MnO~2~ に濃塩酸を加える','CaF~2~ に濃硫酸を加える','塩素水に水素を通す'],a:0,
+ e:'NaCl + H₂SO₄ →(加熱) NaHSO₄ + HCl。下方置換で集める。'},
+{t:'single',q:'HCl 水溶液の名称はどれか。',
+ o:['塩酸','フッ化水素酸','臭化水素酸','ヨウ化水素酸'],a:0,
+ e:'HCl 水溶液を塩酸という。'},
+{t:'single',q:'塩化水素 HCl とアンモニアが反応して生じる白煙の正体はどれか。',
+ o:['NH~4~Cl','NH~3~','HCl','H~2~O'],a:0,
+ e:'HCl + NH₃ → NH₄Cl（白煙）。塩化水素の検出に用いられる。'},
+{t:'single',q:'塩酸にマグネシウム Mg 片を入れると発生する気体はどれか。',
+ o:['水素 H~2~','塩素 Cl~2~','酸素 O~2~','塩化水素 HCl'],a:0,
+ e:'Mg + 2HCl → MgCl₂ + H₂。水素を発生して溶ける。'},
+{t:'single',q:'フッ化水素 HF の製法として正しいものはどれか。',
+ o:['CaF~2~（蛍石の主成分）に濃硫酸を加えて加熱する','NaCl に濃硫酸を加える','MnO~2~ に濃塩酸を加える','塩素と水素を直接反応させる'],a:0,
+ e:'CaF₂ + H₂SO₄ → CaSO₄ + 2HF。'},
+{t:'single',q:'フッ化水素酸について正しい記述はどれか。',
+ o:['弱酸で、ガラスや石英を溶かす','強酸で、ガラスを溶かさない','弱酸で、ポリエチレン容器に保存する必要がある','強酸で、金属容器に保存する'],a:0,
+ e:'HF 水溶液は弱酸。ガラス（ケイ酸塩）や石英 SiO₂ を溶かすので、ポリエチレン容器に保存する。'},
+{t:'single',q:'フッ化水素酸を保存する容器として適切なものはどれか。',
+ o:['ポリエチレン容器','ガラス瓶','石英容器','金属容器'],a:0,
+ e:'フッ化水素酸はガラスや石英を溶かすため、ポリエチレン容器に保存する。'},
+{t:'single',q:'フッ化水素酸がガラスを溶かす反応の化学反応式として正しいものはどれか。',
+ o:['SiO~2~ + 6HF → H~2~SiF~6~ + 2H~2~O','SiO~2~ + 4HF → SiF~4~ + 2H~2~O','SiO~2~ + 2HF → SiF~2~ + H~2~O','SiO~2~ + 8HF → H~2~SiF~8~ + 2H~2~O'],a:0,
+ e:'SiO₂ + 6HF → H₂SiF₆ + 2H₂O。'},
+{t:'single',q:'フッ化水素 HF の沸点が他のハロゲン化水素より著しく高い理由として正しいものはどれか。',
+ o:['F の電気陰性度が大きく、分子間で強い水素結合をつくるから','F の原子量が大きいから','HF はイオン結合性が強いから','HF は分子量が大きいから'],a:0,
+ e:'F の電気陰性度が大きく、分子間で強い水素結合をつくるため、HF の沸点が高くなる（20℃）。'},
+{t:'single',q:'HF が弱酸である理由として正しいものはどれか。',
+ o:['H-F の結合距離が短く、H と F が強く結びついているから','F の電気陰性度が小さいから','HF は水に溶けないから','HF は分子量が大きいから'],a:0,
+ e:'H-F の結合距離は短く、H と F は強く結びついているため、HF は弱酸である。'},
+{t:'single',q:'水溶液が強酸であるハロゲン化水素の組み合わせとして正しいものはどれか。',
+ o:['HCl、HBr、HI','HF のみ','HF と HCl','HF と HBr'],a:0,
+ e:'HCl、HBr、HI の水溶液は強酸。HF のみ弱酸。'},
+{t:'single',q:'ハロゲン化水素の沸点の高低の順序として正しいものはどれか。',
+ o:['HF > HI > HBr > HCl','HCl > HBr > HI > HF','HF > HCl > HBr > HI','HI > HBr > HCl > HF'],a:0,
+ e:'HF は 20℃ と特に高く、次に HI（−35）、HBr（−67）、HCl（−85）の順。'},
+
+{t:'single',q:'ハロゲン化銀の水への溶解性について正しいものはどれか。',
+ o:['AgF 以外は水に溶けない','すべて水によく溶ける','AgF だけ水に溶けない','すべて水に溶けない'],a:0,
+ e:'AgF 以外のハロゲン化銀は水に溶けない。AgF は水に可溶。'},
+{t:'single',q:'ハロゲン化物イオンを含む水溶液に加える試薬として、沈殿生成に用いるものはどれか。',
+ o:['硝酸銀 AgNO~3~ 水溶液','塩化ナトリウム水溶液','水酸化ナトリウム水溶液','硫酸銅水溶液'],a:0,
+ e:'ハロゲン化物イオンを含む水溶液に AgNO₃ 水溶液を加えると沈殿が生じる。'},
+{t:'single',q:'塩化銀 AgCl の沈殿の色はどれか。',
+ o:['白色','淡黄色','黄色','黒色'],a:0,
+ e:'AgCl は白色沈殿。AgBr は淡黄色、AgI は黄色。'},
+{t:'single',q:'臭化銀 AgBr の沈殿の色はどれか。',
+ o:['淡黄色','白色','黄色','赤褐色'],a:0,
+ e:'AgBr は淡黄色沈殿。'},
+{t:'single',q:'ヨウ化銀 AgI の沈殿の色はどれか。',
+ o:['黄色','白色','淡黄色','青色'],a:0,
+ e:'AgI は黄色沈殿。'},
+{t:'single',q:'水に溶けるハロゲン化銀はどれか。',
+ o:['AgF','AgCl','AgBr','AgI'],a:0,
+ e:'AgF は水に可溶。AgCl、AgBr、AgI は水に溶けない。'},
+
+{t:'fill',q:'17族の元素を [ ] という。',
+ bank:['ハロゲン','アルカリ金属','貴ガス','アルカリ土類金属'],ans:'ハロゲン',
+ e:'17族の元素をハロゲンという。'},
+{t:'fill',q:'ハロゲンの原子は価電子を [ ] 個もつ。',
+ bank:['7','1','2','8','5'],ans:'7',
+ e:'ハロゲンの原子は価電子を7個もち、1価の陰イオンになりやすい。'},
+{t:'fill',q:'全元素の中で最も陰性が強い元素は [ ] である。',
+ bank:['フッ素','塩素','酸素','窒素','ヘリウム'],ans:'フッ素',
+ e:'フッ素は全元素の中で最も陰性が強い。'},
+{t:'fill',q:'ハロゲン単体の酸化力の強さは F~2~ > Cl~2~ > [ ] > I~2~ の順である。',
+ bank:['Br~2~','I~2~','Cl~2~','F~2~','H~2~'],ans:'Br~2~',
+ e:'酸化力の強さは F₂ > Cl₂ > Br₂ > I₂。'},
+{t:'fill',q:'MnO~2~ + 4HCl →(加熱) MnCl~2~ + 2H~2~O + [ ]',
+ bank:['Cl~2~','O~2~','H~2~','HCl','MnO~2~'],ans:'Cl~2~',
+ e:'塩素の実験室的製法：MnO₂ + 4HCl →(加熱) MnCl₂ + 2H₂O + Cl₂。'},
+{t:'fill',q:'CaCl(ClO)·H~2~O + 2HCl → CaCl~2~ + [ ] + 2H~2~O',
+ bank:['Cl~2~','O~2~','H~2~','HClO','CaO'],ans:'Cl~2~',
+ e:'さらし粉（漂白粉）に濃塩酸を加えると塩素 Cl₂ が発生する。'},
+{t:'fill',q:'Cl~2~ + H~2~O ⇌ HCl + [ ]',
+ bank:['HClO','HClO~2~','HClO~3~','HClO~4~','ClO~2~'],ans:'HClO',
+ e:'Cl₂ + H₂O ⇌ HCl + HClO。次亜塩素酸 HClO が生じる。'},
+{t:'fill',q:'ヨウ素デンプン反応では、ヨウ素 I~2~ はデンプンに加えると [ ] 色を呈する。',
+ bank:['青','赤','黄','緑','無'],ans:'青',
+ e:'I₂ はデンプンに加えると青色を呈する。'},
+{t:'fill',q:'HCl 水溶液を [ ] という。',
+ bank:['塩酸','フッ化水素酸','臭化水素酸','ヨウ化水素酸','硫酸'],ans:'塩酸',
+ e:'HCl 水溶液を塩酸という。'},
+{t:'fill',q:'CaF~2~ + H~2~SO~4~ → CaSO~4~ + 2[ ]',
+ bank:['HF','HCl','HBr','HI','H~2~S'],ans:'HF',
+ e:'CaF₂ + H₂SO₄ → CaSO₄ + 2HF。フッ化水素の製法。'},
+{t:'fill',q:'SiO~2~ + 6HF → H~2~SiF~6~ + 2[ ]',
+ bank:['H~2~O','O~2~','H~2~','SiF~4~','HF'],ans:'H~2~O',
+ e:'SiO₂ + 6HF → H₂SiF₆ + 2H₂O。フッ化水素酸がガラスを溶かす反応。'},
+{t:'fill',q:'ハロゲン化物イオンに AgNO~3~ 水溶液を加えると、塩化銀 AgCl は [ ] 色の沈殿を生じる。',
+ bank:['白','淡黄','黄','黒','赤'],ans:'白',
+ e:'AgCl は白色沈殿。AgBr は淡黄色、AgI は黄色。'},
+{t:'fill',q:'AgF 以外のハロゲン化銀は水に [ ]。',
+ bank:['溶けない','よく溶ける','少し溶ける','分解する'],ans:'溶けない',
+ e:'AgF 以外のハロゲン化銀は水に溶けない。'},
+{t:'fill',q:'ハロゲン単体のうち、常温常圧で黒紫色の固体で昇華性を示すのは [ ] である。',
+ bank:['ヨウ素','臭素','塩素','フッ素'],ans:'ヨウ素',
+ e:'ヨウ素 I₂ は黒紫色の固体で、昇華性を示す。'},
+{t:'fill',q:'HCl + NH~3~ → [ ]（白煙）',
+ bank:['NH~4~Cl','NH~3~','HCl','H~2~O','NaCl'],ans:'NH~4~Cl',
+ e:'HCl + NH₃ → NH₄Cl。白煙を生じ、塩化水素の検出に用いられる。'}
+];
+
+/* =====================================================================
+   状态
+   ===================================================================== */
+const TOTAL_Q = 10;
+const PASS = 7;
+let quiz = [];
+let curIdx = 0;
+let score = 0;
+let answered = false;
+let wrongList = [];
+let fillAns = null;
+
+/* =====================================================================
+   出题
+   ===================================================================== */
+function buildQuiz(){
+  const pool = shuffle(BANK).slice(0, TOTAL_Q);
+  return pool.map(mkQuestion);
+}
+
+function mkQuestion(item){
+  if(item.t === 'single'){
+    const shuf = shuffle(item.o.map((_, i) => i));
+    return {
+      t:'single',
+      q: item.q,
+      o: shuf.map(i => item.o[i]),
+      a: shuf.indexOf(item.a),
+      e: item.e
+    };
+  }
+  return {
+    t:'fill',
+    q: item.q,
+    bank: shuffle(item.bank),
+    ans: item.ans,
+    e: item.e
+  };
+}
+
+/* =====================================================================
+   视图
+   ===================================================================== */
+function showView(v){
+  document.querySelectorAll('.view').forEach(e => e.classList.remove('active'));
+  $('v-' + v).classList.add('active');
+  document.body.dataset.view = v;   // 控制 FAB 显隐
+  try{ window.scrollTo({top:0, behavior:'smooth'}); }catch(e){ window.scrollTo(0,0); }
+}
+
+function updateHUD(){
+  const p = Math.round(curIdx / TOTAL_Q * 100);
+  $('bar').style.width = p + '%';
+  $('pct').textContent = p + '%';
+  $('scoreNum').textContent = score;
+  $('qMeta').innerHTML = `第 ${curIdx+1} 题<small>共 ${TOTAL_Q} 题</small>`;
+}
+
+/* =====================================================================
+   渲染题目
+   ===================================================================== */
+function renderQuestion(){
+  const q = quiz[curIdx];
+  answered = false;
+  fillAns = null;
+  updateHUD();
+
+  const card = $('questionArea');
+  if(!card) return;
+
+  let html = '';
+
+  if(q.t === 'single'){
+    html += `<span class="qtag">单选题 · 4択</span>`;
+    html += `<div class="qtext">${fmt(q.q)}</div>`;
+    html += `<div class="options" id="optBox">`;
+    q.o.forEach((o, i) => {
+      html += `<button class="opt" data-i="${i}">
+        <span class="num">${CIRC[i]}</span>
+        <span class="txt">${fmt(o)}</span>
+      </button>`;
+    });
+    html += `</div>`;
+  }else{
+    html += `<span class="qtag fill">填空题 · 穴埋め</span>`;
+    const parts = q.q.split(/\[\s*\]/);
+    let qt = '';
+    parts.forEach((p, i) => {
+      qt += fmt(p);
+      if(i < parts.length - 1) qt += `<span class="slot empty" id="slotEl">点击选择</span>`;
+    });
+    html += `<div class="qtext">${qt}</div>`;
+    html += `<div class="bank" id="bankBox">`;
+    q.bank.forEach(b => {
+      html += `<button class="chip" data-v="${b}">${fmt(b)}</button>`;
+    });
+    html += `</div>`;
+    html += `<button class="confirmbtn" id="confirmBtn" disabled>✓ 确认作答</button>`;
+  }
+
+  html += `<div id="fbArea"></div>`;
+  card.innerHTML = html;
+
+  if(q.t === 'single'){
+    card.querySelectorAll('.opt').forEach(btn => {
+      btn.addEventListener('click', () => submitSingle(parseInt(btn.dataset.i, 10)));
+    });
+  }else{
+    const slotEl = $('slotEl');
+    const confirmBtn = $('confirmBtn');
+    card.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        if(answered) return;
+        fillAns = chip.dataset.v;
+        slotEl.className = 'slot filled';
+        slotEl.innerHTML = fmt(fillAns);
+        confirmBtn.disabled = false;
+        card.querySelectorAll('.chip').forEach(c => c.classList.remove('used'));
+        chip.classList.add('used');
+      });
+    });
+    slotEl.addEventListener('click', () => {
+      if(answered) return;
+      fillAns = null;
+      slotEl.className = 'slot empty';
+      slotEl.textContent = '点击选择';
+      confirmBtn.disabled = true;
+      card.querySelectorAll('.chip').forEach(c => c.classList.remove('used'));
+    });
+    confirmBtn.addEventListener('click', () => {
+      if(!answered && fillAns) submitFill(fillAns);
+    });
+  }
+
+  card.style.animation = 'none';
+  void card.offsetWidth;
+  card.style.animation = 'pop .42s cubic-bezier(.34,1.56,.64,1)';
+}
+
+/* =====================================================================
+   判题
+   ===================================================================== */
+function submitSingle(i){
+  if(answered) return;
+  answered = true;
+
+  const q = quiz[curIdx];
+  const correct = (i === q.a);
+  document.querySelectorAll('#optBox > .opt').forEach((b, idx) => {
+    b.disabled = true;
+    if(idx === q.a) b.classList.add('correct');
+    else if(idx === i) b.classList.add('wrong');
+    else b.classList.add('dim');
+  });
+
+  finishQuestion(correct, q, i);
+}
+
+function submitFill(val){
+  if(answered) return;
+  answered = true;
+
+  const q = quiz[curIdx];
+  const norm = s => String(s).replace(/[~\s]/g,'');
+  const correct = (norm(val) === norm(q.ans));
+
+  const slotEl = $('slotEl');
+  if(slotEl){
+    slotEl.className = 'slot ' + (correct ? 'correct' : 'wrong');
+    slotEl.innerHTML = fmt(val);
+  }
+
+  if(!correct && slotEl && slotEl.parentElement){
+    const hint = document.createElement('div');
+    hint.style.cssText = 'margin-top:14px;font-size:13.5px;color:#15803d;font-weight:800;text-align:center;';
+    hint.innerHTML = `正解は「${fmt(q.ans)}」`;
+    slotEl.parentElement.appendChild(hint);
+  }
+
+  const cb = $('confirmBtn');
+  if(cb) cb.style.display = 'none';
+  document.querySelectorAll('.chip').forEach(c => c.disabled = true);
+
+  finishQuestion(correct, q, val);
+}
+
+function finishQuestion(correct, q, userAns){
+  if(correct){
+    score++;
+    $('scoreNum').textContent = score;
+  }else{
+    let yourText = '—';
+    let ansText = '—';
+    try{
+      if(q.t === 'single'){
+        yourText = q.o[userAns] || '—';
+        ansText = q.o[q.a];
+      }else{
+        yourText = userAns || '—';
+        ansText = q.ans;
+      }
+    }catch(err){}
+
+    wrongList.push({ idx: curIdx + 1, q: q.q, your: yourText, ans: ansText });
+  }
+
+  const isLast = (curIdx === TOTAL_Q - 1);
+  const fb = $('fbArea');
+  if(!fb) return;
+
+  fb.innerHTML = `<div class="feedback ${correct ? 'ok' : 'no'}">
+    <div class="fb-title">${correct ? '🎉 答对了！' : '❌ 再想想…'}</div>
+    <div class="fb-body">${fmt(q.e)}</div>
+    <button class="nextbtn" id="nextBtn" onclick="goNext(${isLast})">
+      ${isLast ? '🏁 查看结果' : '下一题 →'}
+    </button>
+  </div>`;
+
+  try{ fb.scrollIntoView({behavior:'smooth', block:'nearest'}); }catch(e){}
+}
+
+window.goNext = function(isLast){
+  if(isLast){
+    showResult();
+  }else{
+    curIdx++;
+    renderQuestion();
+    try{ window.scrollTo({top:0, behavior:'smooth'}); }catch(e){ window.scrollTo(0,0); }
+  }
+};
+
+/* =====================================================================
+   结果
+   ===================================================================== */
+const TITLES = [
+  {min:10, name:'ハロゲンの神様',   cn:'卤素之神',     emoji:'👑', msg:'全问正确！完美通关。'},
+  {min:9,  name:'ハロゲンマスター', cn:'卤素大师',     emoji:'🏆', msg:'只差一步就满分！实力很强。'},
+  {min:8,  name:'酸化反応の匠',     cn:'氧化反应工匠', emoji:'💎', msg:'成绩出色！掌握得很扎实。'},
+  {min:7,  name:'気体の専門家',     cn:'气体专家',     emoji:'⭐', msg:'通过合格线！继续保持。'},
+  {min:0,  name:'再挑戦の戦士',     cn:'再挑战的战士', emoji:'🥲', msg:'再来一次，把称号拿到手！'}
+];
+
+function showResult(){
+  $('bar').style.width = '100%';
+  $('pct').textContent = '100%';
+
+  const rate = Math.round(score / TOTAL_Q * 100);
+  const t = TITLES.find(x => score >= x.min);
+  const passed = score >= PASS;
+
+  const R = 72, C = 2*Math.PI*R;
+  const dash = C * rate / 100;
+
+  let html = `<div class="result">
+    <div class="emoji">${t.emoji}</div>`;
+
+  if(passed){
+    html += `<h2>特训通过！</h2>
+      <div class="title-badge">${t.cn} · ${t.name}</div>`;
+  }else{
+    html += `<h2>差一点点！</h2>
+      <div class="title-badge" style="background:linear-gradient(135deg,#94a3b8,#64748b);box-shadow:0 8px 24px rgba(100,116,139,.34);">${t.cn} · ${t.name}</div>`;
+  }
+
+  html += `<p class="sub">${t.msg}</p>`;
+
+  html += `<div class="ring">
+    <svg width="180" height="180">
+      <circle cx="90" cy="90" r="${R}" fill="none" stroke="#f0fdf4" stroke-width="15"/>
+      <circle cx="90" cy="90" r="${R}" fill="none" stroke="url(#gr)" stroke-width="15"
+        stroke-linecap="round" stroke-dasharray="${dash} ${C-dash}"/>
+      <defs><linearGradient id="gr" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#86efac"/>
+        <stop offset="50%" stop-color="#22c55e"/>
+        <stop offset="100%" stop-color="#15803d"/>
+      </linearGradient></defs>
+    </svg>
+    <div class="inner">
+      <div class="bignum">${score}<small>/${TOTAL_Q}</small></div>
+      <div style="font-size:13px;color:#94a3b8;margin-top:4px;">正确率 ${rate}%</div>
+    </div>
+  </div>`;
+
+  if(wrongList.length){
+    html += `<div class="review"><h3>📝 错题回顾</h3>
+      ${wrongList.map(w => `
+        <div class="item">
+          <span class="tag">第${w.idx}题</span>
+          <span style="flex:1;">
+            <div style="color:#334155;margin-bottom:5px;">${fmt(w.q)}</div>
+            <div style="font-size:12.5px;color:#ef4444;">你的答案：${fmt(w.your)}</div>
+            <div style="font-size:12.5px;color:#15803d;">正确答案：<span class="ans">${fmt(w.ans)}</span></div>
+          </span>
+        </div>`).join('')}
+    </div>`;
+  }else{
+    html += `<div class="review" style="text-align:center;"><h3 style="margin-bottom:0;">✨ 全问正确！完美通关！</h3></div>`;
+  }
+
+  html += `<div class="resultbtns">
+    <button class="again" id="againBtn">🔄 再挑战一次</button>
+    <button class="homebtn" id="homeBtn">🏠 返回特训主页</button>
+    <button class="homebtn" onclick="location.href='index.html'">🏠 返回大主页</button>
+  </div></div>`;
+
+  $('resultCard').innerHTML = html;
+  $('againBtn').addEventListener('click', startQuiz);
+  $('homeBtn').addEventListener('click', () => showView('home'));
+
+  showView('result');
+  if(passed) setTimeout(celebrate, 160);
+}
+
+/* =====================================================================
+   庆祝动画
+   ===================================================================== */
+function celebrate(){
+  const cv = $('confetti');
+  cv.width = window.innerWidth;
+  cv.height = window.innerHeight;
+  cv.style.display = 'block';
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  const colors = ['#86efac','#4ade80','#22c55e','#16a34a','#15803d','#38bdf8','#6366f1','#a855f7','#ec4899','#f59e0b'];
+
+  const ribbons = [];
+  for(let i=0;i<170;i++){
+    ribbons.push({
+      x: Math.random()*W, y: -Math.random()*H*0.9,
+      w: 5 + Math.random()*9, h: 3 + Math.random()*7,
+      vx: (Math.random()-0.5)*3.2, vy: 1.8 + Math.random()*4.5,
+      rot: Math.random()*Math.PI*2, vr: (Math.random()-0.5)*0.24,
+      c: colors[Math.floor(Math.random()*colors.length)],
+      shape: Math.random() < 0.35 ? 'circle' : 'rect',
+      wob: Math.random()*Math.PI*2
+    });
+  }
+
+  const stars = [];
+  const cx = W/2, cy = H*0.42;
+  for(let i=0;i<85;i++){
+    const angle = Math.random()*Math.PI*2;
+    const speed = 7 + Math.random()*13;
+    stars.push({
+      x: cx, y: cy,
+      vx: Math.cos(angle)*speed, vy: Math.sin(angle)*speed,
+      life: 1, decay: 0.006 + Math.random()*0.006,
+      size: 3.5 + Math.random()*4.5,
+      c: colors[Math.floor(Math.random()*colors.length)]
+    });
+  }
+
+  const bursts = [];
+  function addBurst(x, y, count){
+    for(let i=0;i<(count||55);i++){
+      const angle = Math.random()*Math.PI*2;
+      const speed = 3 + Math.random()*11;
+      bursts.push({
+        x, y,
+        vx: Math.cos(angle)*speed, vy: Math.sin(angle)*speed,
+        life: 1, decay: 0.009 + Math.random()*0.012,
+        size: 2 + Math.random()*4.5,
+        c: colors[Math.floor(Math.random()*colors.length)]
+      });
+    }
+  }
+
+  const burstPlan = [
+    {t:120,  x:W*0.18, y:H*0.30, n:50},
+    {t:260,  x:W*0.82, y:H*0.32, n:50},
+    {t:420,  x:W*0.50, y:H*0.55, n:70},
+    {t:620,  x:W*0.30, y:H*0.20, n:45},
+    {t:780,  x:W*0.70, y:H*0.22, n:45},
+    {t:1000, x:W*0.15, y:H*0.60, n:55},
+    {t:1200, x:W*0.85, y:H*0.58, n:55},
+    {t:1450, x:W*0.50, y:H*0.18, n:80}
+  ];
+  burstPlan.forEach(b => setTimeout(()=>addBurst(b.x, b.y, b.n), b.t));
+
+  let t = 0;
+  const maxT = 540;
+
+  (function loop(){
+    ctx.clearRect(0,0,W,H);
+    t++;
+
+    ribbons.forEach(p => {
+      p.wob += 0.06;
+      p.x += p.vx + Math.sin(p.wob)*0.7;
+      p.y += p.vy;
+      p.rot += p.vr;
+      p.vy += 0.075;
+      p.vx *= 0.995;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.fillStyle = p.c;
+      ctx.globalAlpha = Math.max(0, 1 - t/maxT);
+      if(p.shape === 'circle'){
+        ctx.beginPath();
+        ctx.arc(0,0,p.w/2,0,Math.PI*2);
+        ctx.fill();
+      }else{
+        ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+      }
+      ctx.restore();
+    });
+
+    stars.forEach(s => {
+      s.x += s.vx; s.y += s.vy;
+      s.vy += 0.2;
+      s.vx *= 0.965; s.vy *= 0.965;
+      s.life -= s.decay;
+      if(s.life <= 0) return;
+      ctx.save();
+      ctx.translate(s.x, s.y);
+      ctx.globalAlpha = s.life;
+      ctx.fillStyle = s.c;
+      ctx.shadowColor = s.c;
+      ctx.shadowBlur = 16;
+      ctx.beginPath();
+      const spikes = 5;
+      for(let k=0;k<spikes;k++){
+        const a1 = -Math.PI/2 + k*Math.PI*2/spikes;
+        const a2 = a1 + Math.PI/spikes;
+        const r1 = s.size * s.life;
+        const r2 = r1 * 0.42;
+        if(k === 0) ctx.moveTo(Math.cos(a1)*r1, Math.sin(a1)*r1);
+        else ctx.lineTo(Math.cos(a1)*r1, Math.sin(a1)*r1);
+        ctx.lineTo(Math.cos(a2)*r2, Math.sin(a2)*r2);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    });
+
+    bursts.forEach(b => {
+      b.x += b.vx; b.y += b.vy;
+      b.vy += 0.09;
+      b.vx *= 0.965;
+      b.vy *= 0.965;
+      b.life -= b.decay;
+      if(b.life <= 0) return;
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, b.life);
+      ctx.fillStyle = b.c;
+      ctx.shadowColor = b.c;
+      ctx.shadowBlur = 18;
+      ctx.beginPath();
+      ctx.arc(b.x, b.y, b.size * b.life, 0, Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+    });
+
+    for(let i=bursts.length-1;i>=0;i--){
+      if(bursts[i].life <= 0) bursts.splice(i,1);
+    }
+
+    if(t < maxT || bursts.length > 0){
+      requestAnimationFrame(loop);
+    }else{
+      ctx.clearRect(0,0,W,H);
+      cv.style.display = 'none';
+    }
+  })();
+}
+
+/* =====================================================================
+   启动
+   ===================================================================== */
+function startQuiz(){
+  quiz = buildQuiz();
+  curIdx = 0;
+  score = 0;
+  wrongList = [];
+  $('scoreNum').textContent = '0';
+  showView('quiz');
+  renderQuestion();
+}
+
+$('learnCard').addEventListener('click', () => showView('learn'));
+$('startCard').addEventListener('click', startQuiz);
+$('startBtn').addEventListener('click', startQuiz);
+
+/* ===== FAB 悬浮返回 ===== */
+$('fabHome').addEventListener('click', () => {
+  if($('v-quiz').classList.contains('active')){
+    if(confirm('答题进度将丢失，确定要返回特训主页吗？')){
+      showView('home');
+    }
+  }else{
+    showView('home');
+  }
+});
+
+document.addEventListener('keydown', e => {
+  if(!$('v-quiz').classList.contains('active')) return;
+  const q = quiz[curIdx];
+  if(!q || answered) return;
+
+  if(/^[1-4]$/.test(e.key)){
+    const idx = parseInt(e.key,10) - 1;
+    const btns = document.querySelectorAll('#optBox > .opt');
+    if(btns[idx]){ e.preventDefault(); btns[idx].click(); }
+    return;
+  }
+  if(e.key === 'Enter'){
+    const nb = $('nextBtn');
+    if(nb){ e.preventDefault(); nb.click(); return; }
+    const cb = $('confirmBtn');
+    if(cb && !cb.disabled){ e.preventDefault(); cb.click(); }
+  }
+});
+
+$('dbCount').textContent = BANK.length;
+</script>
+</body>
+</html>
